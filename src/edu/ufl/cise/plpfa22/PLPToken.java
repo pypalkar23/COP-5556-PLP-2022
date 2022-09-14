@@ -19,11 +19,11 @@ public class PLPToken implements  IToken{
 
     @Override
     public char[] getText() {
-        return new char[0];
+        return text;
     }
 
     @Override
-    public Object getSourceLocation() {
+    public SourceLocation getSourceLocation() {
         return this.srcLocation;
     }
 

@@ -5,17 +5,16 @@ import java.util.*;
 import edu.ufl.cise.plpfa22.IToken.Kind;
 
 public class Utils {
-    public static enum State{
+    public enum State{
         START,
         KEYWORD,
         IDENTIFIER,
         STRING_LIT_SINGLE_QUOTED,
         STRING_LIT_DOUBLE_QUOTED,
+        INT_DETECTED,
+        COLON_DETECTED,
         ESCAPE_SEQ,
-        AND_LIT,
-        OR_LIT,
-        NEQ_LIT,
-        EQ_LIT,
+        COMPARISON_DETECTED,
         WHITESPACE,
         COMMENT_START
     }
@@ -32,7 +31,8 @@ public class Utils {
     public static final String DIV = "/";
     public static final String MOD = "%";
     public static final String QUESTION = "?";
-    public static final String BANG = "?";
+    public static final String BANG = "!";
+    public static final String COLON = ":";
     public static final String ASSIGN = ":=";
     public static final String EQ = "=";
     public static final String NEQ = "#";
@@ -55,11 +55,17 @@ public class Utils {
     public static final String TAB = "\t";
     public static final String NEW_LINE = "\n";
     public static final String CARRIAGE_RETURN = "\r";
+    public static final String FORM_FEED = "\f";
+    public static final String BACKSPACE = "\b";
+
+
+    public static final String ERROR_NUM_TOO_BIG = "Number to big to parse";
+    public static final String ERROR_INVALID_CHAR_DETECTED = "Invalid Character Detected";
+
 
     static String[] symbolArr = {DOT, COMMA, SEMI, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, MOD, QUESTION, BANG, ASSIGN, EQ, NEQ, LT, GT};
     static String[] keywordArr = {KW_CONST, KW_VAR, KW_PROCEEDURE, KW_CALL, KW_BEGIN, KW_END, KW_IF, KW_WHILE, KW_DO};
     static String[] boolean_lit = {BOOL_TRUE, BOOL_FALSE};
-
 
     public static Map<String, Kind> KIND_MAP = new HashMap<>() {
         {
@@ -96,4 +102,6 @@ public class Utils {
             put(KW_DO, Kind.KW_DO);
         }
     };
+
+
 }
