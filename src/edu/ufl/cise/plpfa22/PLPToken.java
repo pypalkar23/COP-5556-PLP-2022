@@ -29,16 +29,25 @@ public class PLPToken implements  IToken{
 
     @Override
     public int getIntValue() {
+        if (this.kind == Kind.NUM_LIT){
+            return Integer.parseInt(String.valueOf(this.text));
+        }
         return 0;
     }
 
     @Override
     public boolean getBooleanValue() {
+        if (this.kind == Kind.BOOLEAN_LIT){
+            return String.valueOf(this.text).equals("TRUE");
+        }
         return false;
     }
 
     @Override
     public String getStringValue() {
+        if (this.kind == Kind.STRING_LIT){
+            return String.valueOf(this.text);
+        }
         return null;
     }
 }

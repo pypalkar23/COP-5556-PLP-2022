@@ -1,6 +1,6 @@
 package edu.ufl.cise.plpfa22;
 
-import edu.ufl.cise.plpfa22.Utils.State;
+import edu.ufl.cise.plpfa22.LexerUtils.State;
 import edu.ufl.cise.plpfa22.IToken.Kind;
 
 public class PLPLexer implements ILexer {
@@ -39,7 +39,6 @@ public class PLPLexer implements ILexer {
             isError = true;
             throw e;
         }
-
     }
 
     @Override
@@ -52,54 +51,69 @@ public class PLPLexer implements ILexer {
     }
 
     private void scanForToken() throws LexicalException {
+        if (input == null) {
+            this.createEOFToken();
+            return;
+        }
+
         while (cursor < input.length()) {
             char currChar = input.charAt(cursor);
             switch (currState) {
                 case START -> {
                     switch (String.valueOf(currChar)) {
-                        case Utils.DOT, Utils.COMMA, Utils.SEMI, Utils.LPAREN, Utils.RPAREN, Utils.PLUS,
-                                Utils.MINUS, Utils.TIMES, Utils.MOD, Utils.QUESTION, Utils.BANG, Utils.EQ, Utils.NEQ -> {
-                            createNormalToken(currChar);
-                            incrementCounterAndCursor();
+                        case LexerUtils.DOT, LexerUtils.COMMA, LexerUtils.SEMI, LexerUtils.LPAREN, LexerUtils.RPAREN, LexerUtils.PLUS,
+                                LexerUtils.MINUS, LexerUtils.TIMES, LexerUtils.MOD, LexerUtils.QUESTION, LexerUtils.BANG, LexerUtils.EQ, LexerUtils.NEQ -> {
+                            this.tokenStartPos = column;
+                            this.createNormalToken(currChar);
+                            this.incrementCounterAndCursor();
                             return;
                         }
-                        case Utils.DIV -> {
-                            currState = State.COMMENT_START;
-                            incrementCounterAndCursor();
+                        case LexerUtils.DIV -> {
+                            this.currState = State.COMMENT_START;
+                            this.incrementCounterAndCursor();
                         }
-                        case Utils.LT, Utils.GT -> {
-                            currState = State.COMPARISON_DETECTED;
-                            tokenStartPos = cursor;
+                        case LexerUtils.LT, LexerUtils.GT -> {
+                            this.currState = State.COMPARISON_DETECTED;
+                            this.tokenStartPos = cursor;
                             sb.append(currChar);
-                            incrementCounterAndCursor();
+                            this.incrementCounterAndCursor();
                         }
-                        case Utils.COLON -> {
-                            currState = State.COLON_DETECTED;
-                            tokenStartPos = cursor;
-                            incrementCounterAndCursor();
+                        case LexerUtils.COLON -> {
+                            this.currState = State.COLON_DETECTED;
+                            this.tokenStartPos = cursor;
+                            this.incrementCounterAndCursor();
                         }
-                        case Utils.WHITESPACE, Utils.TAB -> {
-                            incrementCounterAndCursor();
+                        case LexerUtils.WHITESPACE, LexerUtils.TAB -> {
+                            this.incrementCounterAndCursor();
                         }
-                        case Utils.NEW_LINE, Utils.CARRIAGE_RETURN -> {
-                            incrementCounterAndCursor();
-                            column = 1;
-                            line++;
+                        case LexerUtils.NEW_LINE, LexerUtils.CARRIAGE_RETURN -> {
+                            this.incrementCounterAndCursor();
+                            this.moveToNextLine();
                         }
-                        case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> {
-                            currState = State.INT_DETECTED;
-                            tokenStartPos = column;
-                            sb.append(currChar);
-                            incrementCounterAndCursor();
+                        case "0" -> {
+                            this.currToken = new PLPToken(Kind.NUM_LIT, new char[]{'0'}, this.line, this.column);
+                            this.incrementCounterAndCursor();
+                        }
+                        case "1", "2", "3", "4", "5", "6", "7", "8", "9" -> {
+                            this.currState = State.INT_DETECTED;
+                            this.tokenStartPos = column;
+                            this.sb.append(currChar);
+                            this.incrementCounterAndCursor();
+                        }
+                        case LexerUtils.QUOTE -> {
+                            this.currState = State.STRING_LIT_DOUBLE_QUOTED;
+                            this.tokenStartPos = column;
+                            this.sb.append(currChar);
+                            this.incrementCounterAndCursor();
                         }
                         default -> {
                             if (Character.isJavaIdentifierStart(currChar)) {
-                                currState = State.IDENTIFIER;
-                                tokenStartPos = column;
-                                sb.append(currChar);
-                                incrementCounterAndCursor();
-                            }else{
-                                throwInvalidCharErrorMsg();
+                                this.currState = State.IDENTIFIER;
+                                this.tokenStartPos = column;
+                                this.sb.append(currChar);
+                                this.incrementCounterAndCursor();
+                            } else {
+                                this.throwInvalidCharErrorMsg();
                                 return;
                             }
                         }
@@ -107,112 +121,115 @@ public class PLPLexer implements ILexer {
                 }
                 case INT_DETECTED -> {
                     if (Character.isDigit(currChar)) {
-                        sb.append(currChar);
-                        incrementCounterAndCursor();
+                        this.sb.append(currChar);
+                        this.incrementCounterAndCursor();
                     } else {
                         try {
-                            createNumLitToken();
-                            resetState();
+                            this.createNumLitToken();
+                            this.resetState();
                             return;
                         } catch (NumberFormatException e) {
-                            lastErrorMsg = Utils.ERROR_NUM_TOO_BIG;
-                            errorLoc = tokenStartPos;
+                            this.lastErrorMsg = LexerUtils.ERROR_NUM_TOO_BIG;
+                            this.errorLoc = tokenStartPos;
                             throw new LexicalException(lastErrorMsg, line, errorLoc);
                         }
                     }
                 }
                 case IDENTIFIER -> {
                     if (Character.isLetter(currChar) || Character.isDigit(currChar) || Character.isJavaIdentifierPart(currChar)) {
-                        sb.append(currChar);
-                        incrementCounterAndCursor();
+                        this.sb.append(currChar);
+                        this.incrementCounterAndCursor();
                     } else {
-                        createIdentifierToken();
-                        resetState();
+                        this.createIdentifierToken();
+                        this.resetState();
                         return;
                     }
                 }
                 case STRING_LIT_DOUBLE_QUOTED -> {
-
-                }
-                case STRING_LIT_SINGLE_QUOTED -> {
-
+                    this.handleString('\"');
+                    return;
                 }
                 case COMPARISON_DETECTED -> {
                     String res = "";
                     if (currChar == '=') {
-                        sb.append(currChar);
-                        incrementCounterAndCursor();
+                        this.sb.append(currChar);
+                        this.incrementCounterAndCursor();
                     }
-                    createComparisonToken();
-                    resetState();
+                    this.createComparisonToken();
+                    this.resetState();
                     return;
                 }
                 case COLON_DETECTED -> {
                     String res = "";
                     if (currChar == '=') {
-                        currToken = new PLPToken(Kind.ASSIGN, res.toCharArray(), line, tokenStartPos);
-                        resetState();
+                        this.currToken = new PLPToken(Kind.ASSIGN, res.toCharArray(), line, tokenStartPos);
+                        this.resetState();
                         return;
                     } else {
                         throwInvalidCharErrorMsg();
                     }
                 }
                 case COMMENT_START -> {
-                    resetState();
+                    this.resetState();
                     if (currChar == '/') {
-                        while (cursor < input.length() && currChar != '\n') {
-                            currChar = input.charAt(cursor);
+                        while (this.cursor < input.length()) {
+                            char tempchar = input.charAt(cursor);
+                            if (tempchar == '\n') {
+                                this.resetState();
+                                break;
+                            }
                             incrementCounterAndCursor();
                         }
                     } else {
-                        currToken = new PLPToken(Kind.DIV, new char[]{'/'}, line, tokenStartPos);
-                        resetState();
+                        this.createNormalToken(input.charAt(cursor - 1));
+                        this.resetState();
                         return;
                     }
                 }
             }
         }
 
-        //Leftover conditions
+        //Input has ended but last token is yet to be returned
         if (currState != State.START) {
             State tempState = currState;
             resetState();
             switch (tempState) {
                 case IDENTIFIER -> {
-                    createIdentifierToken();
+                    this.createIdentifierToken();
                     return;
                 }
                 case INT_DETECTED -> {
-                    createNumLitToken();
+                    this.createNumLitToken();
                     return;
                 }
                 case COLON_DETECTED -> {
                     throwInvalidCharErrorMsg();
                 }
                 case COMMENT_START -> {
-                    currToken = new PLPToken(Kind.DIV, new char[]{'/'}, line, tokenStartPos);
+                    this.createNormalToken(input.charAt(cursor - 1));
+                    //currToken = new PLPToken(Kind.DIV, new char[]{'/'}, line, tokenStartPos);
                     return;
                 }
             }
         }
-        currToken = new PLPToken(Kind.EOF, new char['0'], line, column);
+        createEOFToken();
     }
 
     private void createNormalToken(char currchar) {
-        currToken = new PLPToken(Utils.KIND_MAP.get(String.valueOf(currchar)), new char[]{currchar}, line, column);
+        this.currToken = new PLPToken(LexerUtils.KIND_MAP.get(String.valueOf(currchar)), new char[]{currchar}, line, tokenStartPos);
     }
 
     private void createIdentifierToken() {
         String res = sb.toString();
-        Kind kind = Utils.KIND_MAP.getOrDefault(res, Kind.IDENT);
-        currToken = new PLPToken(kind, res.toCharArray(), line, tokenStartPos);
+        Kind kind = LexerUtils.KIND_MAP.getOrDefault(res, Kind.IDENT);
+        this.currToken = new PLPToken(kind, res.toCharArray(), line, tokenStartPos);
     }
 
     private void createNumLitToken() throws NumberFormatException {
         String res = sb.toString();
         try {
             int num = Integer.parseInt(res);
-            currToken = new PLPToken(Kind.NUM_LIT, res.toCharArray(), line, tokenStartPos);
+            this.currToken = new PLPToken(Kind.NUM_LIT, res.toCharArray(), line, tokenStartPos);
         } catch (NumberFormatException e) {
             throw e;
         }
@@ -220,12 +237,12 @@ public class PLPLexer implements ILexer {
 
     public void createComparisonToken() {
         String res = sb.toString();
-        Kind kind = Utils.KIND_MAP.get(res);
-        currToken = new PLPToken(kind, res.toCharArray(), line, tokenStartPos);
+        Kind kind = LexerUtils.KIND_MAP.get(res);
+        this.currToken = new PLPToken(kind, res.toCharArray(), line, tokenStartPos);
     }
 
     public void resetState() {
-        sb.setLength(0);
+        this.sb.setLength(0);
         this.currState = State.START;
     }
 
@@ -235,8 +252,39 @@ public class PLPLexer implements ILexer {
     }
 
     private void throwInvalidCharErrorMsg() throws LexicalException {
-        errorLoc = tokenStartPos;
-        lastErrorMsg = Utils.ERROR_INVALID_CHAR_DETECTED;
+        this.errorLoc = tokenStartPos;
+        this.lastErrorMsg = LexerUtils.ERROR_INVALID_CHAR_DETECTED;
         throw new LexicalException(lastErrorMsg, line, tokenStartPos);
     }
+
+    private void createEOFToken() {
+        this.currToken = new PLPToken(Kind.EOF, new char['0'], line, column);
+    }
+
+    private void moveToNextLine(){
+        this.column = 1;
+        this.line++;
+    }
+
+    private void handleString(char endchar) throws LexicalException {
+        boolean isStringComplete = false;
+        while (cursor < input.length()) {
+            char tempChar = input.charAt(cursor);
+            this.sb.append(tempChar);
+            this.incrementCounterAndCursor();
+            if (tempChar == endchar) {
+                isStringComplete = true;
+                break;
+            }
+        }
+        if (isStringComplete) {
+            this.currToken = new PLPToken(Kind.STRING_LIT, sb.toString().toCharArray(), line, tokenStartPos);
+            this.resetState();
+        } else {
+            this.lastErrorMsg = LexerUtils.ERROR_REACHED_END_OF_FILE;
+            throw new LexicalException(this.lastErrorMsg, line, tokenStartPos);
+        }
+
+    }
+
 }

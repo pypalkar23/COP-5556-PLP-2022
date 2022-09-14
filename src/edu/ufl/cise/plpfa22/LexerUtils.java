@@ -1,10 +1,11 @@
 package edu.ufl.cise.plpfa22;
 
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
 
 import edu.ufl.cise.plpfa22.IToken.Kind;
 
-public class Utils {
+public class LexerUtils {
     public enum State{
         START,
         KEYWORD,
@@ -59,8 +60,10 @@ public class Utils {
     public static final String BACKSPACE = "\b";
 
 
+
     public static final String ERROR_NUM_TOO_BIG = "Number to big to parse";
     public static final String ERROR_INVALID_CHAR_DETECTED = "Invalid Character Detected";
+    public static final String ERROR_REACHED_END_OF_FILE = "Reached End of File";
 
 
     static String[] symbolArr = {DOT, COMMA, SEMI, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, MOD, QUESTION, BANG, ASSIGN, EQ, NEQ, LT, GT};
