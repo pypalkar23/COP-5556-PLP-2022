@@ -1,8 +1,5 @@
 package edu.ufl.cise.plpfa22;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PLPToken implements IToken {
     Kind kind;
     char[] text;
@@ -73,19 +70,5 @@ public class PLPToken implements IToken {
             }
         }
         return sb.toString();
-    }
-
-    private char[] getCharArrayForString() {
-        StringBuffer sb = new StringBuffer();
-        for (char c : this.text) {
-            switch (String.valueOf(c)) {
-                case LexerUtils.QUOTE, LexerUtils.SINGLE_QUOTE, LexerUtils.BACKSLASH, LexerUtils.TAB,
-                        LexerUtils.NEW_LINE, LexerUtils.FORM_FEED , LexerUtils.CARRIAGE_RETURN-> {
-                    sb.append(LexerUtils.BACKSLASH);
-                }
-            }
-            sb.append(c);
-        }
-        return sb.toString().toCharArray();
     }
 }

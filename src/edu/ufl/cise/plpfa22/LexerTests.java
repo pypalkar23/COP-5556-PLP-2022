@@ -165,6 +165,35 @@ class LexerTest {
         checkEOF(lexer.next());
     }
 
+
+    @Test
+    public void testEscapeSequences0() throws LexicalException {
+        String input = "\"\\b \\t \\n \\f \\r \"";
+        show(input);
+        ILexer lexer = getLexer(input);
+        IToken t = lexer.next();
+        String val = t.getStringValue();
+        String expectedStringValue = "\b \t \n \f \r ";
+        assertEquals(expectedStringValue, val);
+        String text = String.valueOf(t.getText());
+        String expectedText = "\"\\b \\t \\n \\f \\r \"";
+        assertEquals(expectedText,text);
+    }
+
+    @Test
+    public void testEscapeSequences1() throws LexicalException {
+        String input = "   \" ...  \\\"  \\\'  \\\\  \"";
+        show(input);
+        ILexer lexer = getLexer(input);
+        IToken t = lexer.next();
+        String val = t.getStringValue();
+        String expectedStringValue = " ...  \"  \'  \\  ";
+        assertEquals(expectedStringValue, val);
+        String text = String.valueOf(t.getText());
+        String expectedText = "\" ...  \\\"  \\\'  \\\\  \""; //almost the same as input, but white space is omitted
+        assertEquals(expectedText,text);
+    }
+
     // Keyword followed by a token
     @Test
     public void testComplexCombinations() throws LexicalException {
@@ -203,33 +232,6 @@ class LexerTest {
         });
     }
 
-    @Test
-    void test1() throws PLPException {
-        String input = """
-                1 2 3 4 """;
-        ILexer lexer = CompilerComponentFactory.getLexer(input);
-        checkInt(lexer.next(), 1);
-        checkInt(lexer.next(), 2);
-        checkInt(lexer.next(), 3);
-        checkInt(lexer.next(), 4);
-        checkEOF(lexer.next());
-    }
-
-//    @Test
-//    void test1() throws PLPException {
-//        String input = """
-//                0 1 2 3 4
-//                """;
-//        ILexer lexer = CompilerComponentFactory.getLexer(input);
-//        checkInt(lexer.next(), 0);
-////        checkInt(lexer.next(), 1);
-////        checkInt(lexer.next(), 2);
-////        checkInt(lexer.next(), 3);
-////        checkInt(lexer.next(), 4);
-////        checkEOF(lexer.next());
-//    }
-
-    //Boolean literals
     @Test
     public void testBoolean() throws LexicalException {
         String input = """
@@ -410,35 +412,6 @@ class LexerTest {
             lexer.next();
             lexer.next();
         });
-    }
-
-
-    @Test
-    public void testEscapeSequences0() throws LexicalException {
-        String input = "\"\\b \\t \\n \\f \\r \"";
-        show(input);
-        ILexer lexer = getLexer(input);
-        IToken t = lexer.next();
-        String val = t.getStringValue();
-        String expectedStringValue = "\b \t \n \f \r ";
-        assertEquals(expectedStringValue, val);
-        String text = String.valueOf(t.getText());
-        String expectedText = "\"\\b \\t \\n \\f \\r \"";
-        assertEquals(expectedText,text);
-    }
-
-    @Test
-    public void testEscapeSequences1() throws LexicalException {
-        String input = "   \" ...  \\\"  \\\'  \\\\  \"";
-        show(input);
-        ILexer lexer = getLexer(input);
-        IToken t = lexer.next();
-        String val = t.getStringValue();
-        String expectedStringValue = " ...  \"  \'  \\  ";
-        assertEquals(expectedStringValue, val);
-        String text = String.valueOf(t.getText());
-        String expectedText = "\" ...  \\\"  \\\'  \\\\  \""; //almost the same as input, but white space is omitted
-        assertEquals(expectedText,text);
     }
 }
 
