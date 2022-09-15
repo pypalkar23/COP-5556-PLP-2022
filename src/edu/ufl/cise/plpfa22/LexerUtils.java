@@ -1,7 +1,6 @@
 package edu.ufl.cise.plpfa22;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 import edu.ufl.cise.plpfa22.IToken.Kind;
 
@@ -10,7 +9,7 @@ public class LexerUtils {
         START,
         KEYWORD,
         IDENTIFIER,
-        STRING_LIT_SINGLE_QUOTED,
+        STRING_LIT_ESCAPE_QUOTED,
         STRING_LIT_DOUBLE_QUOTED,
         INT_DETECTED,
         COLON_DETECTED,
@@ -43,13 +42,14 @@ public class LexerUtils {
     public static final String GE = ">=";
     public static final String KW_CONST = "CONST";
     public static final String KW_VAR = "VAR";
-    public static final String KW_PROCEEDURE = "PROCEEDURE";
+    public static final String KW_PROCEEDURE = "PROCEDURE";
     public static final String KW_CALL = "CALL";
     public static final String KW_BEGIN = "BEGIN";
     public static final String KW_END = "END";
     public static final String KW_IF = "IF";
     public static final String KW_WHILE = "WHILE";
     public static final String KW_DO = "DO";
+    public static final String KW_THEN = "THEN";
     public static final String BOOL_TRUE = "TRUE";
     public static final String BOOL_FALSE = "FALSE";
     public static final String WHITESPACE = " ";
@@ -58,17 +58,20 @@ public class LexerUtils {
     public static final String CARRIAGE_RETURN = "\r";
     public static final String FORM_FEED = "\f";
     public static final String BACKSPACE = "\b";
-
-
+    public static final String BACKSLASH = "\\";
+    public static  final String SINGLE_QUOTE = "\'";
 
     public static final String ERROR_NUM_TOO_BIG = "Number to big to parse";
     public static final String ERROR_INVALID_CHAR_DETECTED = "Invalid Character Detected";
     public static final String ERROR_REACHED_END_OF_FILE = "Reached End of File";
 
 
-    static String[] symbolArr = {DOT, COMMA, SEMI, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, MOD, QUESTION, BANG, ASSIGN, EQ, NEQ, LT, GT};
-    static String[] keywordArr = {KW_CONST, KW_VAR, KW_PROCEEDURE, KW_CALL, KW_BEGIN, KW_END, KW_IF, KW_WHILE, KW_DO};
-    static String[] boolean_lit = {BOOL_TRUE, BOOL_FALSE};
+    static String[] symbolArr = new String[]{DOT, COMMA, SEMI, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, MOD, QUESTION, BANG, ASSIGN, EQ, NEQ, LT, GT};
+    static String[] keywordArr = new String[]{KW_CONST, KW_VAR, KW_PROCEEDURE, KW_CALL, KW_BEGIN, KW_END, KW_IF, KW_WHILE, KW_DO};
+    static String[] boolean_lit = new String[]{BOOL_TRUE, BOOL_FALSE};
+    static String[] spaceChars = new String[]{"b","t","n","f","r"};
+
+    static Set<String> spaceCharsSet = new HashSet<>(Arrays.asList(spaceChars));
 
     public static Map<String, Kind> KIND_MAP = new HashMap<>() {
         {
@@ -103,6 +106,7 @@ public class LexerUtils {
             put(KW_IF, Kind.KW_IF);
             put(KW_WHILE, Kind.KW_WHILE);
             put(KW_DO, Kind.KW_DO);
+            put(KW_THEN, Kind.KW_THEN);
         }
     };
 
