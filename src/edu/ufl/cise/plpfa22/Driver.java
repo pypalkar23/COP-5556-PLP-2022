@@ -3,11 +3,7 @@ package edu.ufl.cise.plpfa22;
 public class Driver {
     public static void main(String[] args) {
         String input = """
-                "This is a string"
-                // this is a comment
-                TRUE FALSE
-                /+-%
-                """;
+                0 1 2 3 4 """;
         ILexer lexer = CompilerComponentFactory.getLexer(input);
         try {
             while (true) {
@@ -16,7 +12,7 @@ public class Driver {
                     break;
                 System.out.println(
                         String.format("Kind:%s\nText:%s\nLine:%s",
-                                token.getKind().toString(), String.valueOf(token.getText()), token.getSourceLocation().toString()));
+                                token.getKind().toString(), token.getStringValue(), token.getSourceLocation().toString()));
                 System.out.println("------");
             }
         } catch (LexicalException e) {

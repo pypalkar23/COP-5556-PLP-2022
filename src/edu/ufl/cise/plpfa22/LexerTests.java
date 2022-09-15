@@ -165,6 +165,29 @@ class LexerTest {
         checkEOF(lexer.next());
     }
 
+    // Keyword followed by a token
+    @Test
+    public void testComplexCombinations() throws LexicalException {
+        String input = """
+				(value)
+				(FALSE)
+				PROCEDURE*
+				""";
+        show(input);
+        ILexer lexer = getLexer(input);
+
+        checkToken(lexer.next(), Kind.LPAREN, 1,1);
+        checkIdent(lexer.next(), "value", 1, 2);
+        checkToken(lexer.next(), Kind.RPAREN, 1, 7);
+
+        checkToken(lexer.next(), Kind.LPAREN, 2,1);
+        checkToken(lexer.next(), Kind.BOOLEAN_LIT, 2, 2);
+        checkToken(lexer.next(), Kind.RPAREN, 2, 7);
+
+        checkToken(lexer.next(), Kind.KW_PROCEDURE, 3, 1);
+        checkToken(lexer.next(), Kind.TIMES, 3, 10);
+    }
+
 
     //Example showing how to handle number that are too big.
     @Test
@@ -180,6 +203,214 @@ class LexerTest {
         });
     }
 
+    @Test
+    void test1() throws PLPException {
+        String input = """
+                1 2 3 4 """;
+        ILexer lexer = CompilerComponentFactory.getLexer(input);
+        checkInt(lexer.next(), 1);
+        checkInt(lexer.next(), 2);
+        checkInt(lexer.next(), 3);
+        checkInt(lexer.next(), 4);
+        checkEOF(lexer.next());
+    }
+
+//    @Test
+//    void test1() throws PLPException {
+//        String input = """
+//                0 1 2 3 4
+//                """;
+//        ILexer lexer = CompilerComponentFactory.getLexer(input);
+//        checkInt(lexer.next(), 0);
+////        checkInt(lexer.next(), 1);
+////        checkInt(lexer.next(), 2);
+////        checkInt(lexer.next(), 3);
+////        checkInt(lexer.next(), 4);
+////        checkEOF(lexer.next());
+//    }
+
+    //Boolean literals
+    @Test
+    public void testBoolean() throws LexicalException {
+        String input = """
+				FALSE TRUE
+				FALSE
+				true
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.BOOLEAN_LIT, 1,1);
+        checkToken(lexer.next(), Kind.BOOLEAN_LIT, 1,7);
+        checkToken(lexer.next(), Kind.BOOLEAN_LIT, 2,1);
+        checkToken(lexer.next(), Kind.IDENT, 3,1);
+    }
+
+    //Tokens in a string
+    @Test
+    public void testValidString() throws LexicalException {
+        String input = """
+				"test text"
+				"@"
+				"TRUE"
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.STRING_LIT, 1,1);
+        checkToken(lexer.next(), Kind.STRING_LIT, 2,1);
+        checkToken(lexer.next(), Kind.STRING_LIT, 3,1);
+    }
+
+    //Generic Expressions
+    @Test
+    public void testEQ() throws LexicalException {
+        String input = """
+				i=3;
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "i",1,1);
+        checkToken(lexer.next(), Kind.EQ, 1,2);
+        checkInt(lexer.next(), 3, 1, 3);
+    }
+
+    //ASSIGN
+    @Test
+    public void testASSIGN() throws LexicalException {
+        String input = """
+				i:=3;
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "i",1,1);
+        checkToken(lexer.next(), Kind.ASSIGN, 1,2);
+        checkInt(lexer.next(), 3, 1, 4);
+    }
+
+    //ASSIGN
+    @Test
+    public void testValidIdentifiers() throws LexicalException {
+        String input = """
+				variable_123
+				a$5
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "variable_123",1,1);
+        checkIdent(lexer.next(), "a$5",2,1);
+    }
+
+    //Generic <= expression
+    @Test
+    public void testLEExpression() throws LexicalException {
+        String input = """
+				IF I<=j
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.KW_IF, 1, 1);
+        checkIdent(lexer.next(), "I",1, 4);
+        checkToken(lexer.next(), Kind.LE, 1, 5);
+        checkIdent(lexer.next(), "j",1,7);
+    }
+
+    //Generic <= expression
+    @Test
+    public void testGEExpression() throws LexicalException {
+        String input = """
+				I>=j
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "I",1, 1);
+        checkToken(lexer.next(), Kind.GE, 1, 2);
+        checkIdent(lexer.next(), "j",1,4);
+    }
+
+    //Generic <= expression
+    @Test
+    public void testGTExpression() throws LexicalException {
+        String input = """
+				I>j
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "I",1, 1);
+        checkToken(lexer.next(), Kind.GT, 1, 2);
+        checkIdent(lexer.next(), "j",1,3);
+    }
+
+    //Generic <= expression
+    @Test
+    public void testEQExpression() throws LexicalException {
+        String input = """
+				IF I5=j
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.KW_IF, 1, 1);
+        checkIdent(lexer.next(), "I5",1, 4);
+        checkToken(lexer.next(), Kind.EQ, 1, 6);
+        checkIdent(lexer.next(), "j",1,7);
+    }
+
+    //Tokens in a string
+    @Test
+    public void testInvalidString() throws LexicalException {
+        String input = """
+				test text"
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "test", 1, 1);
+        checkIdent(lexer.next(), "text", 1, 6);
+        Exception e = assertThrows(LexicalException.class, () -> {
+            lexer.next();
+        });
+    }
+
+    // #IF
+    @Test
+    public void testNEQIF() throws LexicalException {
+        String input = """
+				#IF
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.NEQ, 1, 1);
+        checkToken(lexer.next(), Kind.KW_IF, 1, 2);
+    }
+
+    // #IF-THEN
+    @Test
+    public void testIFTHEN() throws LexicalException {
+        String input = """
+				IF i < 5 THEN i = j
+				""";
+        ILexer lexer = getLexer(input);
+        checkToken(lexer.next(), Kind.KW_IF, 1, 1);
+        checkIdent(lexer.next(), "i", 1, 4);
+        checkToken(lexer.next(), Kind.LT, 1, 6);
+        checkInt(lexer.next(), 5, 1, 8);
+        checkToken(lexer.next(), Kind.KW_THEN, 1, 10);
+
+        checkIdent(lexer.next(), "i", 1, 15);
+        checkToken(lexer.next(), Kind.EQ, 1, 17);
+        checkIdent(lexer.next(), "j", 1, 19);
+    }
+
+    //Valid Integer 0
+    @Test
+    public void testValidIntZero() throws LexicalException {
+        String input = """
+				i=0
+				""";
+        ILexer lexer = getLexer(input);
+        checkIdent(lexer.next(), "i", 1, 1);
+        checkToken(lexer.next(), Kind.EQ, 1, 2);
+        checkInt(lexer.next(), 0, 1, 3);
+    }
+
+    //Invalid tokens
+    @Test
+    public void testInvalidToken() throws LexicalException {
+        String input = """
+				@ ^
+				""";
+        ILexer lexer = getLexer(input);
+        Exception e = assertThrows(LexicalException.class, () -> {
+            lexer.next();
+            lexer.next();
+        });
+    }
 
 
     @Test
