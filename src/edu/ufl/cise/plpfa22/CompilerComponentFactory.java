@@ -8,4 +8,8 @@ public class CompilerComponentFactory {
     public static ILexer getLexer(String input) {
         return new PLPLexer(input);
     }
+
+    public static IParser getParser(ILexer lexer){
+        return new PLPParser(lexer);
+    }
 }
