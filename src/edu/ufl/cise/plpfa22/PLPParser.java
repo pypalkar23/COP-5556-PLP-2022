@@ -21,22 +21,25 @@ public class PLPParser implements IParser {
 
     @Override
     public ASTNode parse() throws PLPException {
-        consume();
-
         return parseProgram();
     }
 
     private Program parseProgram() throws PLPException {
-        return new Program(null, parseBlock());
+        return new Program(null, parseBlock(false));
     }
 
 
-    private Block parseBlock() throws PLPException{
+    private Block parseBlock(boolean inProceedure) throws PLPException {
+        consume();
         List<ConstDec> constDeclist = new ArrayList<>();
         List<VarDec> varDecList = new ArrayList<>();
         List<ProcDec> procDecList = new ArrayList<>();
         Statement statement = null;
+        boolean reachedEndOfBlock = false;
+
         while (this.token.getKind() != Kind.EOF) {
+            if (reachedEndOfBlock)
+                break;
             switch (this.token.getKind()) {
                 case KW_VAR -> {
                     varDecList = parseVariableDec();
@@ -45,13 +48,27 @@ public class PLPParser implements IParser {
                     constDeclist = parseConstantDec();
                 }
                 case KW_PROCEDURE -> {
-
+                    ProcDec procDec=parseProcDec();
+                    procDecList.add(procDec);
+                }
+                case DOT -> {
+                    consume();
+                    if (this.token.getKind() != Kind.EOF) {
+                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                    }
+                    reachedEndOfBlock = true;
+                }
+                case KW_END -> {
+                    if(inProceedure) {
+                        reachedEndOfBlock = true;
+                    }
+                    consume();
+                    getNextIfSemi();
                 }
                 default -> {
-                    parseStatement();
+                    statement = parseStatement();
                 }
             }
-
         }
 
         if (statement == null) {
@@ -62,8 +79,9 @@ public class PLPParser implements IParser {
 
     private List<ConstDec> parseConstantDec() throws PLPException {
         List<ConstDec> constDecs = new ArrayList<>();
+        Boolean isSemiColonDetected = false;
         consume();
-        while (this.token.getKind() == Kind.EOF) {
+        while (this.token.getKind() != Kind.EOF) {
             if (!isIdentToken()) {
                 throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
             }
@@ -76,101 +94,199 @@ public class PLPParser implements IParser {
                                 token.getSourceLocation().column());
             }
             consume();
-            if (this.token.getKind() != Kind.STRING_LIT || this.token.getKind() != Kind.NUM_LIT
-                    || this.token.getKind() != Kind.BOOLEAN_LIT) {
+            if (!(this.token.getKind() == Kind.STRING_LIT || this.token.getKind() == Kind.NUM_LIT
+                    || this.token.getKind() == Kind.BOOLEAN_LIT)) {
                 throw new SyntaxException
                         (String.format(ParserUtils.WRONG_CHARACTER_DETECTED, LexerUtils.EQ),
                                 token.getSourceLocation().line(),
                                 token.getSourceLocation().column());
             }
-            constDecs.add(new ConstDec(ident, this.token, ParserUtils.getConstVal(this.token)));
+            constDecs.add(new ConstDec(null, ident, ParserUtils.getConstVal(this.token)));
             consume();
-            if(isCommaToken())
+            if (isCommaToken())
                 consume();
-            if(isSemiColonToken())
+            if (isSemiColonToken()){
+                isSemiColonDetected = true;
+                consume();
                 break;
+            }
         }
+
+        if (!isSemiColonDetected)
+            throw new SyntaxException(LexerUtils.ERROR_REACHED_END_OF_FILE, token.getSourceLocation().line(), token.getSourceLocation().column());
 
         return constDecs;
     }
 
     private List<VarDec> parseVariableDec() throws PLPException {
         List<VarDec> varDecs = new ArrayList<>();
+        Boolean isSemiColonDetected = false;
         consume();
-        while(this.token.getKind()!=Kind.EOF){
+        while (this.token.getKind() != Kind.EOF) {
             if (!isIdentToken()) {
-                throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
             }
-            varDecs.add(new VarDec(null,this.token));
+            varDecs.add(new VarDec(null, this.token));
             consume();
-            if(isCommaToken())
+            if (isCommaToken())
                 consume();
-            if(isSemiColonToken())
+            if (isSemiColonToken()){
+                isSemiColonDetected = true;
+                consume();
                 break;
+            }
         }
+
+        if (!isSemiColonDetected)
+            throw new SyntaxException(LexerUtils.ERROR_REACHED_END_OF_FILE, token.getSourceLocation().line(), token.getSourceLocation().column());
+
         return varDecs;
     }
 
-    private List<ProcDec> parseProcDecList() {
-        return null;
-    }
+    private ProcDec parseProcDec() throws PLPException {
+        consume();
+        if (!isIdentToken()) {
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        }
+        IToken ftoken = this.token;
+        consume();
+        if(this.token.getKind()!=Kind.SEMI)
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        Block block = parseBlock(true);
 
-    private ProcDec parseProcDec() {
-        return null;
+        return new ProcDec(null, ftoken, block);
     }
 
     //Parse Statement
-    private Statement parseStatement() {
-        return null;
+    private Statement parseStatement() throws PLPException {
+        Statement stmt = null;
+        switch (this.token.getKind()) {
+
+            case QUESTION -> {
+                stmt = parseStatementInput();
+            }
+            case KW_CALL -> {
+                stmt = parseStatementCall();
+            }
+            case BANG -> {
+                stmt = parseStatementOutput();
+            }
+            case KW_IF -> {
+                stmt = parseStatementIf();
+            }
+            case KW_WHILE -> {
+                stmt = parseStatementWhile();
+            }
+            case KW_BEGIN -> {
+                stmt = parseStatementBlock();
+            }
+            case IDENT -> {
+                stmt = parseStatementAssign();
+            }
+        }
+
+        return stmt;
     }
 
-    private Statement parseStatementAssign() {
-        return null;
+    private Statement parseStatementAssign() throws PLPException {
+        Ident ident = new Ident(this.token);
+        consume();
+        if (!isAssignToken())
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        consume();
+        Expression exp = parseExpression();
+
+        return new StatementAssign(null, ident, exp);
     }
 
-    private Statement parseStatementInput() {
-        return null;
+    private Statement parseStatementInput() throws PLPException {
+        consume();
+        if (!isIdentToken()) {
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        }
+        Ident ident = new Ident(this.token);
+
+        return new StatementInput(null, ident);
     }
 
-    private Statement parseStatementOutput() {
-        return null;
+    private Statement parseStatementOutput() throws PLPException {
+        consume();
+        Expression exp = parseExpression();
+
+        return new StatementOutput(null, exp);
     }
 
-    private Statement parseStatementBlock() {
-        return null;
+    private Statement parseStatementBlock() throws PLPException {
+        List<Statement> statements = new ArrayList<>();
+        consume();
+        while (this.token.getKind() != Kind.EOF) {
+            if (this.token.getKind() == Kind.KW_END){
+                break;
+            }
+            Statement statement = parseStatement();
+            statements.add(statement);
+            consume();
+            getNextIfSemi();
+        }
+        return new StatementBlock(null, statements);
     }
 
-    private Statement parseStatementIf() {
-        return null;
+    private Statement parseStatementIf() throws PLPException {
+        consume();
+        Expression exp = parseExpression();
+        if (this.token.getKind() != Kind.KW_THEN) {
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        }
+        consume();
+        Statement stmt = parseStatement();
+
+
+        return new StatementIf(null, exp, stmt);
     }
 
-    private Statement parseStatementWhile() {
-        return null;
+    private Statement parseStatementWhile() throws PLPException {
+        consume();
+        Expression exp = parseExpression();
+        if (this.token.getKind() != Kind.KW_DO) {
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        }
+        consume();
+        Statement stmt = parseStatement();
+
+        return new StatementWhile(null, exp, stmt);
+    }
+
+    private Statement parseStatementCall() throws PLPException {
+        consume();
+        if (!isIdentToken()) {
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+        }
+
+        return new StatementCall(null, new Ident(this.token));
     }
 
 
     private Expression parseExpression() throws PLPException {
         Expression exp1 = parseAdditiveExpression();
-        consume();
-        if (token.getKind() == Kind.LT || token.getKind() == Kind.GT || token.getKind() == Kind.EQ ||
+
+        while(token.getKind() == Kind.LT || token.getKind() == Kind.GT || token.getKind() == Kind.EQ ||
                 token.getKind() == Kind.NEQ || token.getKind() == Kind.GE || token.getKind() == Kind.LE) {
             IToken op = token;
             consume();
             Expression exp2 = parseAdditiveExpression();
-            return new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(null, exp1, op, exp2);
         }
-
         return exp1;
     }
 
     private Expression parseAdditiveExpression() throws PLPException {
         Expression exp1 = parseMultiplicativeExpression();
-        consume();
-        if (token.getKind() == Kind.PLUS || token.getKind() == Kind.MINUS) {
+
+        while(token.getKind() == Kind.PLUS || token.getKind() == Kind.MINUS) {
             IToken op = token;
             consume();
             Expression exp2 = parseMultiplicativeExpression();
-            return new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(null, exp1, op, exp2);
         }
 
         return exp1;
@@ -178,44 +294,44 @@ public class PLPParser implements IParser {
 
     private Expression parseMultiplicativeExpression() throws PLPException {
         Expression exp1 = parsePrimaryExpression();
-        consume();
-        if (token.getKind() == Kind.TIMES || token.getKind() == Kind.DIV || token.getKind() == Kind.MOD) {
+        while (token.getKind() == Kind.TIMES || token.getKind() == Kind.DIV || token.getKind() == Kind.MOD) {
             IToken op = token;
             consume();
             Expression exp2 = parsePrimaryExpression();
-            return new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(null, exp1, op, exp2);
         }
 
         return exp1;
     }
 
     private Expression parsePrimaryExpression() throws PLPException {
+        Expression exp;
         switch (this.token.getKind()) {
             case IDENT -> {
-                return new ExpressionIdent(this.token);
+                exp = new ExpressionIdent(this.token);
             }
             case BOOLEAN_LIT -> {
-                return new ExpressionBooleanLit(this.token);
+                exp = new ExpressionBooleanLit(this.token);
             }
             case STRING_LIT -> {
-                return new ExpressionStringLit(this.token);
+                exp = new ExpressionStringLit(this.token);
             }
             case NUM_LIT -> {
-                return new ExpressionNumLit(this.token);
+                exp = new ExpressionNumLit(this.token);
             }
             case LPAREN -> {
-                Expression exp = parseExpression();
                 consume();
+                exp = parseExpression();
                 if (this.token.getKind() != Kind.RPAREN) {
                     throw new SyntaxException(String.format(ParserUtils.INVALID_CHARACTER_FOUND, LexerUtils.RPAREN));
                 }
-                consume();
-                return exp;
             }
             default -> {
                 throw new SyntaxException(String.format(ParserUtils.INVALID_CHARACTER_FOUND, null));
             }
         }
+        consume();
+        return exp;
     }
 
     public boolean isEqualToken() {
@@ -234,9 +350,13 @@ public class PLPParser implements IParser {
         return this.token.getKind() == Kind.COMMA;
     }
 
-    public boolean isIdentToken(){
+    public boolean isIdentToken() {
         return this.token.getKind() == Kind.IDENT;
     }
 
+    public void getNextIfSemi()throws PLPException{
+        if(isSemiColonToken())
+            consume();
+    }
 
 }
