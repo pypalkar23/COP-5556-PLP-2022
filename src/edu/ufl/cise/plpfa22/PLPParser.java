@@ -26,6 +26,8 @@ public class PLPParser implements IParser {
 
     private Program parseProgram() throws PLPException {
         Program prog = new Program(null, parseBlock(false));
+        if(!isDotDetected)
+            throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
         return prog;
     }
 
@@ -53,7 +55,7 @@ public class PLPParser implements IParser {
                     procDecList.add(procDec);
                 }
                 case DOT -> {
-                    isDotDetected=true;
+                    isDotDetected = true;
                     consume();
                     if (this.token.getKind() != Kind.EOF) {
                         throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
@@ -66,13 +68,22 @@ public class PLPParser implements IParser {
                     }
                     consume();
                 }*/
-                default -> {
+                case QUESTION,BANG,KW_CALL,KW_BEGIN,SEMI,KW_WHILE,KW_IF,IDENT ->
+                {
                     statement = parseStatement();
-                    consume();
-                    if(!inProceedure && isSemiColonToken())
-                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
-                    getNextIfSemi();
+                    if(this.token.getKind() == Kind.DOT){
+                        isDotDetected = true;
+                    }else{
+                        consume();
+                        if(!inProceedure && isSemiColonToken())
+                            throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                        getNextIfSemi();
+                    }
+
                     reachedEndOfBlock = true;
+                }
+                default ->{
+                    throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                 }
             }
         }
@@ -211,7 +222,7 @@ public class PLPParser implements IParser {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
         Ident ident = new Ident(this.token);
-
+        consume();
 
         return new StatementInput(null, ident);
     }
@@ -227,12 +238,13 @@ public class PLPParser implements IParser {
         List<Statement> statements = new ArrayList<>();
         consume();
         while (this.token.getKind() != Kind.EOF) {
+
+            Statement statement = parseStatement();
+            statements.add(statement);
             if (this.token.getKind() == Kind.KW_END){
                 consume();
                 break;
             }
-            Statement statement = parseStatement();
-            statements.add(statement);
             consume();
             getNextIfSemi();
         }
