@@ -10,7 +10,7 @@ import edu.ufl.cise.plpfa22.IToken.Kind;
 public class PLPParser implements IParser {
     private ILexer lexer;
     private IToken token;
-
+    private boolean isDotDetected;
     public PLPParser(ILexer lexer) {
         this.lexer = lexer;
     }
@@ -25,7 +25,8 @@ public class PLPParser implements IParser {
     }
 
     private Program parseProgram() throws PLPException {
-        return new Program(null, parseBlock(false));
+        Program prog = new Program(null, parseBlock(false));
+        return prog;
     }
 
 
@@ -34,7 +35,7 @@ public class PLPParser implements IParser {
         List<ConstDec> constDeclist = new ArrayList<>();
         List<VarDec> varDecList = new ArrayList<>();
         List<ProcDec> procDecList = new ArrayList<>();
-        Statement statement = null;
+        Statement statement = new StatementEmpty(null);
         boolean reachedEndOfBlock = false;
 
         while (this.token.getKind() != Kind.EOF) {
@@ -42,38 +43,40 @@ public class PLPParser implements IParser {
                 break;
             switch (this.token.getKind()) {
                 case KW_VAR -> {
-                    varDecList = parseVariableDec();
+                    varDecList.addAll(parseVariableDec());
                 }
                 case KW_CONST -> {
-                    constDeclist = parseConstantDec();
+                    constDeclist.addAll(parseConstantDec());
                 }
                 case KW_PROCEDURE -> {
                     ProcDec procDec=parseProcDec();
                     procDecList.add(procDec);
                 }
                 case DOT -> {
+                    isDotDetected=true;
                     consume();
                     if (this.token.getKind() != Kind.EOF) {
                         throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                     }
                     reachedEndOfBlock = true;
                 }
-                case KW_END -> {
+                /*case KW_END -> {
                     if(inProceedure) {
                         reachedEndOfBlock = true;
                     }
                     consume();
-                    getNextIfSemi();
-                }
+                }*/
                 default -> {
                     statement = parseStatement();
+                    consume();
+                    if(!inProceedure && isSemiColonToken())
+                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                    getNextIfSemi();
+                    reachedEndOfBlock = true;
                 }
             }
         }
 
-        if (statement == null) {
-            statement = new StatementEmpty(null);
-        }
         return new Block(null, constDeclist, varDecList, procDecList, statement);
     }
 
@@ -183,6 +186,9 @@ public class PLPParser implements IParser {
             case IDENT -> {
                 stmt = parseStatementAssign();
             }
+            case SEMI ->{
+                stmt = new StatementEmpty(null);
+            }
         }
 
         return stmt;
@@ -206,6 +212,7 @@ public class PLPParser implements IParser {
         }
         Ident ident = new Ident(this.token);
 
+
         return new StatementInput(null, ident);
     }
 
@@ -221,6 +228,7 @@ public class PLPParser implements IParser {
         consume();
         while (this.token.getKind() != Kind.EOF) {
             if (this.token.getKind() == Kind.KW_END){
+                consume();
                 break;
             }
             Statement statement = parseStatement();
