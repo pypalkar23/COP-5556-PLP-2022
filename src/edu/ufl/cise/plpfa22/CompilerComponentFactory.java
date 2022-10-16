@@ -4,6 +4,9 @@
  project.  No other use is authorized.
  */
 package edu.ufl.cise.plpfa22;
+
+import edu.ufl.cise.plpfa22.ast.ASTVisitor;
+
 public class CompilerComponentFactory {
     public static ILexer getLexer(String input) {
         return new PLPLexer(input);
@@ -11,5 +14,9 @@ public class CompilerComponentFactory {
 
     public static IParser getParser(ILexer lexer){
         return new PLPParser(lexer);
+    }
+
+    public static ASTVisitor getScopeVisitor(){
+        return new PLPScopeVisitor();
     }
 }

@@ -10,7 +10,7 @@ import edu.ufl.cise.plpfa22.PLPException;
 public class Ident extends ASTNode {
 	
 	Declaration dec;
-
+	int nest;
 	public Ident(IToken firstToken) {
 		super(firstToken);
 	}
@@ -40,5 +40,12 @@ public class Ident extends ASTNode {
 	public char[] getText() {
 		return firstToken.getText();
 	}
-	
+
+	public int getNest() {
+		return nest;
+	}
+
+	public void setNest(int nest) {
+		this.nest = nest;
+	}
 }
