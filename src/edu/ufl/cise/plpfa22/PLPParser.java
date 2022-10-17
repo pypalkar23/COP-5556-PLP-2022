@@ -53,34 +53,28 @@ public class PLPParser implements IParser {
                 case KW_PROCEDURE -> {
                     ProcDec procDec=parseProcDec();
                     procDecList.add(procDec);
+                    inProceedure = false;
                 }
                 case DOT -> {
-                    isDotDetected = true;
+                    this.isDotDetected = true;
                     consume();
                     if (this.token.getKind() != Kind.EOF) {
                         throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                     }
                     reachedEndOfBlock = true;
                 }
-                /*case KW_END -> {
-                    if(inProceedure) {
-                        reachedEndOfBlock = true;
-                    }
-                    consume();
-                }*/
                 case QUESTION,BANG,KW_CALL,KW_BEGIN,SEMI,KW_WHILE,KW_IF,IDENT ->
                 {
                     statement = parseStatement();
-                    if(this.token.getKind() == Kind.DOT){
-                        isDotDetected = true;
-                    }else{
+                    if(!isCurrentTokenDOT()){
                         consume();
                         if(!inProceedure && isSemiColonToken())
                             throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                         getNextIfSemi();
+                        isCurrentTokenDOT();
                     }
-
                     reachedEndOfBlock = true;
+
                 }
                 default ->{
                     throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
@@ -92,6 +86,7 @@ public class PLPParser implements IParser {
     }
 
     private List<ConstDec> parseConstantDec() throws PLPException {
+        IToken firstToken = this.token;
         List<ConstDec> constDecs = new ArrayList<>();
         Boolean isSemiColonDetected = false;
         consume();
@@ -115,7 +110,7 @@ public class PLPParser implements IParser {
                                 token.getSourceLocation().line(),
                                 token.getSourceLocation().column());
             }
-            constDecs.add(new ConstDec(null, ident, ParserUtils.getConstVal(this.token)));
+            constDecs.add(new ConstDec(firstToken, ident, ParserUtils.getConstVal(this.token)));
             consume();
             if (isCommaToken())
                 consume();
@@ -133,6 +128,7 @@ public class PLPParser implements IParser {
     }
 
     private List<VarDec> parseVariableDec() throws PLPException {
+        IToken ftoken = this.token;
         List<VarDec> varDecs = new ArrayList<>();
         Boolean isSemiColonDetected = false;
         consume();
@@ -140,7 +136,7 @@ public class PLPParser implements IParser {
             if (!isIdentToken()) {
                 throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
             }
-            varDecs.add(new VarDec(null, this.token));
+            varDecs.add(new VarDec(ftoken, this.token));
             consume();
             if (isCommaToken())
                 consume();
@@ -159,16 +155,17 @@ public class PLPParser implements IParser {
 
     private ProcDec parseProcDec() throws PLPException {
         consume();
+        IToken firstToken = this.token;
         if (!isIdentToken()) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
-        IToken ftoken = this.token;
+        IToken procNameToken = this.token;
         consume();
         if(this.token.getKind()!=Kind.SEMI)
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         Block block = parseBlock(true);
 
-        return new ProcDec(null, ftoken, block);
+        return new ProcDec(firstToken, procNameToken, block);
     }
 
     //Parse Statement
@@ -206,6 +203,7 @@ public class PLPParser implements IParser {
     }
 
     private Statement parseStatementAssign() throws PLPException {
+        IToken fToken = this.token;
         Ident ident = new Ident(this.token);
         consume();
         if (!isAssignToken())
@@ -213,30 +211,33 @@ public class PLPParser implements IParser {
         consume();
         Expression exp = parseExpression();
 
-        return new StatementAssign(null, ident, exp);
+        return new StatementAssign(fToken, ident, exp);
     }
 
     private Statement parseStatementInput() throws PLPException {
         consume();
+        IToken fToken = this.token;
         if (!isIdentToken()) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
         Ident ident = new Ident(this.token);
         consume();
 
-        return new StatementInput(null, ident);
+        return new StatementInput(fToken, ident);
     }
 
     private Statement parseStatementOutput() throws PLPException {
         consume();
+        IToken fToken = this.token;
         Expression exp = parseExpression();
 
-        return new StatementOutput(null, exp);
+        return new StatementOutput(fToken, exp);
     }
 
     private Statement parseStatementBlock() throws PLPException {
         List<Statement> statements = new ArrayList<>();
         consume();
+        IToken fToken = this.token;
         while (this.token.getKind() != Kind.EOF) {
 
             Statement statement = parseStatement();
@@ -248,11 +249,12 @@ public class PLPParser implements IParser {
             consume();
             getNextIfSemi();
         }
-        return new StatementBlock(null, statements);
+        return new StatementBlock(fToken, statements);
     }
 
     private Statement parseStatementIf() throws PLPException {
         consume();
+        IToken fToken = this.token;
         Expression exp = parseExpression();
         if (this.token.getKind() != Kind.KW_THEN) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
@@ -261,11 +263,12 @@ public class PLPParser implements IParser {
         Statement stmt = parseStatement();
 
 
-        return new StatementIf(null, exp, stmt);
+        return new StatementIf(fToken, exp, stmt);
     }
 
     private Statement parseStatementWhile() throws PLPException {
         consume();
+        IToken fToken = this.token;
         Expression exp = parseExpression();
         if (this.token.getKind() != Kind.KW_DO) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
@@ -273,16 +276,18 @@ public class PLPParser implements IParser {
         consume();
         Statement stmt = parseStatement();
 
-        return new StatementWhile(null, exp, stmt);
+        return new StatementWhile(fToken, exp, stmt);
     }
 
     private Statement parseStatementCall() throws PLPException {
         consume();
+        IToken fToken = this.token;
         if (!isIdentToken()) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
 
-        return new StatementCall(null, new Ident(this.token));
+
+        return new StatementCall(fToken, new Ident(this.token));
     }
 
 
@@ -377,6 +382,14 @@ public class PLPParser implements IParser {
     public void getNextIfSemi()throws PLPException{
         if(isSemiColonToken())
             consume();
+    }
+
+    public boolean isCurrentTokenDOT()throws PLPException{
+        if(this.token.getKind() == Kind.DOT){
+            this.isDotDetected = true;
+        }
+
+        return this.isDotDetected;
     }
 
 }
