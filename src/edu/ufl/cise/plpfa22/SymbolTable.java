@@ -84,16 +84,11 @@ public class SymbolTable {
 
     public SymbolTableRecord findRecord(String name) {
         SymbolTableRecord result = null;
-        SymbolTableRecord record = this.table.get(name);
-        if (record != null) {
-
-            SymbolTableRecord scanner = record;
+        SymbolTableRecord scanner = this.table.get(name);
             while (scanner != null && scanner.scope > this.currScope) {
                 scanner = scanner.next;
             }
             result = scanner;
-
-        }
         return result;
     }
 
