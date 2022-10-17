@@ -83,6 +83,7 @@ public class SymbolTable {
 
 
     public SymbolTableRecord findRecord(String name) {
+        SymbolTableRecord result = null;
         SymbolTableRecord record = this.table.get(name);
         if (record != null) {
             Iterator<Integer> itr = scopeStack.iterator();
@@ -95,13 +96,13 @@ public class SymbolTable {
                 }
                 if (scanner != null)
                 {
-                    record = scanner;
+                    result = scanner;
                     //break;
                 }
 
             //}
         }
-        return record;
+        return result;
     }
 
 }
