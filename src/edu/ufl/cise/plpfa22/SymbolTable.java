@@ -14,24 +14,45 @@ public class SymbolTable {
             this.scope = scope;
             this.dec = dec;
             this.next = next;
+
         }
     }
 
     Deque<Integer> scopeStack;
     HashMap<String, SymbolTableRecord> table;
     int currScope;
-
+    int nestLevel;
+    int maxScope;
 
     public SymbolTable(){
-        this.currScope = -1;
+        this.nestLevel = -1;
+        this.maxScope = -1;
+        this.currScope = maxScope;
         table = new HashMap<>();
         scopeStack = new ArrayDeque<>();
         scopeStack.push(currScope);
     }
 
+    public void enterNestLevel(){
+        this.nestLevel++;
+    }
+
+    public int getNestLevel(){
+        return this.nestLevel;
+    }
+
+    public int leaveNestLevel(){
+        return this.nestLevel--;
+    }
+
+
     public void enterScope() {
-        currScope++;
-        scopeStack.push(currScope);
+        maxScope++;
+        scopeStack.push(maxScope);
+    }
+
+    public void updateScope(){
+        currScope = scopeStack.peek();
     }
 
     public void leaveScope() {
@@ -65,19 +86,20 @@ public class SymbolTable {
         SymbolTableRecord record = this.table.get(name);
         if (record != null) {
             Iterator<Integer> itr = scopeStack.iterator();
-            while(itr.hasNext()) {
-                int scopeId = itr.next();
+            //while(itr.hasNext()) {
+                //int scopeId = itr.next();
+
                 SymbolTableRecord scanner = record;
-                while (scanner != null && scanner.scope != scopeId) {
+                while (scanner != null && scanner.scope > this.currScope) {
                     scanner = scanner.next;
                 }
                 if (scanner != null)
                 {
                     record = scanner;
-                    break;
+                    //break;
                 }
 
-            }
+            //}
         }
         return record;
     }

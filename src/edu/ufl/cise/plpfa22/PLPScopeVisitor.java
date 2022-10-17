@@ -3,7 +3,11 @@ package edu.ufl.cise.plpfa22;
 import edu.ufl.cise.plpfa22.ast.*;
 import edu.ufl.cise.plpfa22.SymbolTable;
 import edu.ufl.cise.plpfa22.SymbolTable.SymbolTableRecord;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 public class PLPScopeVisitor implements ASTVisitor {
 
@@ -15,14 +19,15 @@ public class PLPScopeVisitor implements ASTVisitor {
     @Override
     public Object visitProgram(Program program, Object arg) throws PLPException {
         Block block = (Block)program.block;
-        symbolTable.enterScope();
+
         block.visit(this,arg);
-        symbolTable.leaveScope();
+
         return null;
     }
 
     @Override
     public Object visitBlock(Block block, Object arg) throws PLPException {
+        symbolTable.enterNestLevel();
         List<VarDec> varDecs = block.varDecs;
         List<ConstDec> constDecs = block.constDecs;
         List<ProcDec> procDecs = block.procedureDecs;
@@ -34,15 +39,18 @@ public class PLPScopeVisitor implements ASTVisitor {
             constDec.visit(this,arg);
         }
 
-        for(ProcDec procDec:procDecs){
-            procDec.visit(this,false);
+        for(int i=0; i< procDecs.size();i++){
+            procDecs.get(i).visit(this,false);
+        }
+        this.symbolTable.updateScope();
+
+        for(int i= procDecs.size()-1; i>=0;i--){
+            procDecs.get(i).visit(this,true);
         }
 
-        for(ProcDec procDec:procDecs){
-            procDec.visit(this,true);
-        }
         Statement stmt = block.statement;
         stmt.visit(this,arg);
+        symbolTable.leaveNestLevel();
         return null;
     }
 
@@ -58,7 +66,7 @@ public class PLPScopeVisitor implements ASTVisitor {
 
     @Override
     public Object visitVarDec(VarDec varDec, Object arg) throws PLPException {
-        varDec.setNest(symbolTable.currScope);
+        varDec.setNest(symbolTable.getNestLevel());
         if(!symbolTable.insert(varDec.ident.getStringValue(),varDec)){
             throw new ScopeException(ScopeUtils.SYMBOL_ALREADY_DEFINED,varDec.ident.getSourceLocation().line(),varDec.ident.getSourceLocation().column());
         }
@@ -130,7 +138,7 @@ public class PLPScopeVisitor implements ASTVisitor {
             throw new ScopeException(ScopeUtils.SYMBOL_NOT_DEFINED,expressionIdent.getSourceLocation().line(),expressionIdent.getSourceLocation().column());
         }
         expressionIdent.setDec(record.dec);
-        expressionIdent.setNest(this.symbolTable.currScope);
+        expressionIdent.setNest(this.symbolTable.getNestLevel());
         return null;
     }
 
@@ -154,16 +162,16 @@ public class PLPScopeVisitor implements ASTVisitor {
         Boolean isParseBlock = (Boolean) arg;
 
         if(isParseBlock){
-            //symbolTable.enterScope();
             Block block = procDec.block;
             block.visit(this,arg);
-            //symbolTable.leaveScope();
+            symbolTable.leaveScope();
         }
         else{
-            procDec.setNest(this.symbolTable.currScope);
+            procDec.setNest(this.symbolTable.getNestLevel());
             if(!symbolTable.insert(procDec.ident.getStringValue(),procDec)){
                 throw new ScopeException(ScopeUtils.SYMBOL_ALREADY_DEFINED,procDec.ident.getSourceLocation().line(),procDec.ident.getSourceLocation().column());
             }
+            symbolTable.enterScope();
         }
 
         return null;
@@ -171,7 +179,7 @@ public class PLPScopeVisitor implements ASTVisitor {
 
     @Override
     public Object visitConstDec(ConstDec constDec, Object arg) throws PLPException {
-        constDec.setNest(symbolTable.currScope);
+        constDec.setNest(symbolTable.getNestLevel());
         if(!symbolTable.insert(constDec.ident.getStringValue(),constDec)){
             throw new ScopeException(ScopeUtils.SYMBOL_ALREADY_DEFINED,constDec.ident.getSourceLocation().line(),constDec.ident.getSourceLocation().column());
         }
@@ -189,7 +197,7 @@ public class PLPScopeVisitor implements ASTVisitor {
         if(record==null){
             throw new ScopeException(ScopeUtils.SYMBOL_NOT_DEFINED,ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
-        ident.setNest(this.symbolTable.currScope);
+        ident.setNest(this.symbolTable.getNestLevel());
         ident.setDec(record.dec);
         return null;
     }
