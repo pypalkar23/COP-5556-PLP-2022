@@ -49,8 +49,9 @@ public class PLPScopeVisitor implements ASTVisitor {
     @Override
     public Object visitStatementAssign(StatementAssign statementAssign, Object arg) throws PLPException {
         Ident ident = statementAssign.ident;
-        Expression exp = statementAssign.expression;
         ident.visit(this,arg);
+        Expression exp = statementAssign.expression;
+
         exp.visit(this,arg);
         return null;
     }
@@ -151,13 +152,15 @@ public class PLPScopeVisitor implements ASTVisitor {
     @Override
     public Object visitProcedure(ProcDec procDec, Object arg) throws PLPException {
         Boolean isParseBlock = (Boolean) arg;
+
         if(isParseBlock){
-            symbolTable.enterScope();
+            //symbolTable.enterScope();
             Block block = procDec.block;
             block.visit(this,arg);
-            symbolTable.leaveScope();
+            //symbolTable.leaveScope();
         }
         else{
+            procDec.setNest(this.symbolTable.currScope);
             if(!symbolTable.insert(procDec.ident.getStringValue(),procDec)){
                 throw new ScopeException(ScopeUtils.SYMBOL_ALREADY_DEFINED,procDec.ident.getSourceLocation().line(),procDec.ident.getSourceLocation().column());
             }
