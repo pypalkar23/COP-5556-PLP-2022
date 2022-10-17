@@ -24,7 +24,7 @@ public class SymbolTable {
     int nestLevel;
     int maxScope;
 
-    public SymbolTable(){
+    public SymbolTable() {
         this.nestLevel = -1;
         this.maxScope = -1;
         this.currScope = maxScope;
@@ -33,15 +33,15 @@ public class SymbolTable {
         scopeStack.push(currScope);
     }
 
-    public void enterNestLevel(){
+    public void enterNestLevel() {
         this.nestLevel++;
     }
 
-    public int getNestLevel(){
+    public int getNestLevel() {
         return this.nestLevel;
     }
 
-    public int leaveNestLevel(){
+    public int leaveNestLevel() {
         return this.nestLevel--;
     }
 
@@ -51,7 +51,7 @@ public class SymbolTable {
         scopeStack.push(maxScope);
     }
 
-    public void updateScope(){
+    public void updateScope() {
         currScope = scopeStack.peek();
     }
 
@@ -86,21 +86,13 @@ public class SymbolTable {
         SymbolTableRecord result = null;
         SymbolTableRecord record = this.table.get(name);
         if (record != null) {
-            Iterator<Integer> itr = scopeStack.iterator();
-            //while(itr.hasNext()) {
-                //int scopeId = itr.next();
 
-                SymbolTableRecord scanner = record;
-                while (scanner != null && scanner.scope > this.currScope) {
-                    scanner = scanner.next;
-                }
-                if (scanner != null)
-                {
-                    result = scanner;
-                    //break;
-                }
+            SymbolTableRecord scanner = record;
+            while (scanner != null && scanner.scope > this.currScope) {
+                scanner = scanner.next;
+            }
+            result = scanner;
 
-            //}
         }
         return result;
     }
