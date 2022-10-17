@@ -194,8 +194,8 @@ public class PLPParser implements IParser {
             case IDENT -> {
                 stmt = parseStatementAssign();
             }
-            case SEMI ->{
-                stmt = new StatementEmpty(null);
+            case SEMI,KW_END ->{
+                stmt = new StatementEmpty(this.token);
             }
         }
 
@@ -239,10 +239,10 @@ public class PLPParser implements IParser {
         consume();
         IToken fToken = this.token;
         while (this.token.getKind() != Kind.EOF) {
-
             Statement statement = parseStatement();
             statements.add(statement);
             if (this.token.getKind() == Kind.KW_END){
+
                 consume();
                 break;
             }
