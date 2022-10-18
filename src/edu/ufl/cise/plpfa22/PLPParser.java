@@ -56,6 +56,9 @@ public class PLPParser implements IParser {
                     inProceedure = false;
                 }
                 case DOT -> {
+                    if (inProceedure) {
+                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                    }
                     this.isDotDetected = true;
                     consume();
                     if (this.token.getKind() != Kind.EOF) {
@@ -68,13 +71,12 @@ public class PLPParser implements IParser {
                     statement = parseStatement();
                     if(!isCurrentTokenDOT()){
                         consume();
-                        if(!inProceedure && isSemiColonToken())
-                            throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
-                        getNextIfSemi();
-                        isCurrentTokenDOT();
                     }
+                    else if(!inProceedure && isSemiColonToken())
+                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
+                    getNextIfSemi();
+                    isCurrentTokenDOT();
                     reachedEndOfBlock = true;
-
                 }
                 default ->{
                     throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
