@@ -53,7 +53,6 @@ public class PLPParser implements IParser {
                 case KW_PROCEDURE -> {
                     ProcDec procDec=parseProcDec();
                     procDecList.add(procDec);
-                    inProceedure = false;
                 }
                 case DOT -> {
                     if (inProceedure) {
@@ -69,14 +68,16 @@ public class PLPParser implements IParser {
                 case QUESTION,BANG,KW_CALL,KW_BEGIN,SEMI,KW_WHILE,KW_IF,IDENT ->
                 {
                     statement = parseStatement();
-                    if(!isCurrentTokenDOT()){
+                    /*if(!isCurrentTokenDOT()){
                         consume();
+                    }*/
+                    if(isSemiColonToken()){
+                        if(inProceedure)
+                            reachedEndOfBlock = true;
+                        else
+                            throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                     }
-                    else if(!inProceedure && isSemiColonToken())
-                        throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
                     getNextIfSemi();
-                    isCurrentTokenDOT();
-                    reachedEndOfBlock = true;
                 }
                 default ->{
                     throw new SyntaxException("SYNTAX ERROR", token.getSourceLocation().line(), token.getSourceLocation().column());
@@ -165,6 +166,7 @@ public class PLPParser implements IParser {
         consume();
         if(this.token.getKind()!=Kind.SEMI)
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+
         Block block = parseBlock(true);
 
         return new ProcDec(firstToken, procNameToken, block);
@@ -196,7 +198,7 @@ public class PLPParser implements IParser {
             case IDENT -> {
                 stmt = parseStatementAssign();
             }
-            case SEMI,KW_END ->{
+            case SEMI ->{
                 stmt = new StatementEmpty(this.token);
             }
         }
@@ -212,7 +214,7 @@ public class PLPParser implements IParser {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         consume();
         Expression exp = parseExpression();
-
+        //expression at the end no need to consume the last token it happens in the expression parsing
         return new StatementAssign(fToken, ident, exp);
     }
 
@@ -231,8 +233,9 @@ public class PLPParser implements IParser {
     private Statement parseStatementOutput() throws PLPException {
         consume();
         IToken fToken = this.token;
-        Expression exp = parseExpression();
 
+        Expression exp = parseExpression();
+        //expression at the end no need to consume the last token it happens in the expression parsing
         return new StatementOutput(fToken, exp);
     }
 
@@ -240,17 +243,24 @@ public class PLPParser implements IParser {
         List<Statement> statements = new ArrayList<>();
         consume();
         IToken fToken = this.token;
+        Statement statement = null;
         while (this.token.getKind() != Kind.EOF) {
-            Statement statement = parseStatement();
-            statements.add(statement);
             if (this.token.getKind() == Kind.KW_END){
-
+                if(statement!=null){
+                    statements.add(new StatementEmpty(null));
+                }
                 consume();
                 break;
             }
-            consume();
-            getNextIfSemi();
+            statement = parseStatement();
+            statements.add(statement);
+            statement = null;
+            if(isSemiColonToken()){
+                statement = new StatementEmpty(null);
+                consume();
+            }
         }
+
         return new StatementBlock(fToken, statements);
     }
 
@@ -263,7 +273,6 @@ public class PLPParser implements IParser {
         }
         consume();
         Statement stmt = parseStatement();
-
 
         return new StatementIf(fToken, exp, stmt);
     }
@@ -287,9 +296,9 @@ public class PLPParser implements IParser {
         if (!isIdentToken()) {
             throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
+        consume();
 
-
-        return new StatementCall(fToken, new Ident(this.token));
+        return new StatementCall(fToken, new Ident(fToken));
     }
 
 
@@ -347,6 +356,7 @@ public class PLPParser implements IParser {
                 exp = new ExpressionNumLit(this.token);
             }
             case LPAREN -> {
+                //consume left parenthesis
                 consume();
                 exp = parseExpression();
                 if (this.token.getKind() != Kind.RPAREN) {

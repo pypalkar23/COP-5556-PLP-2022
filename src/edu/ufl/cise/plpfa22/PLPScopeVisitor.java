@@ -19,8 +19,9 @@ public class PLPScopeVisitor implements ASTVisitor {
     @Override
     public Object visitProgram(Program program, Object arg) throws PLPException {
         Block block = (Block)program.block;
-
+        symbolTable.enterScope();
         block.visit(this,arg);
+        symbolTable.leaveScope();
 
         return null;
     }
@@ -42,7 +43,6 @@ public class PLPScopeVisitor implements ASTVisitor {
         for(int i=0; i< procDecs.size();i++){
             procDecs.get(i).visit(this,false);
         }
-        this.symbolTable.updateScope();
 
         for(int i= procDecs.size()-1; i>=0;i--){
             procDecs.get(i).visit(this,true);
@@ -162,6 +162,7 @@ public class PLPScopeVisitor implements ASTVisitor {
         Boolean isParseBlock = (Boolean) arg;
 
         if(isParseBlock){
+            symbolTable.enterScope();
             Block block = procDec.block;
             block.visit(this,arg);
             symbolTable.leaveScope();
@@ -171,7 +172,7 @@ public class PLPScopeVisitor implements ASTVisitor {
             if(!symbolTable.insert(procDec.ident.getStringValue(),procDec)){
                 throw new ScopeException(ScopeUtils.SYMBOL_ALREADY_DEFINED,procDec.ident.getSourceLocation().line(),procDec.ident.getSourceLocation().column());
             }
-            symbolTable.enterScope();
+
         }
 
         return null;

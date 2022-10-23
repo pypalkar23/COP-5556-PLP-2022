@@ -48,6 +48,7 @@ public class SymbolTable {
 
     public void enterScope() {
         maxScope++;
+        currScope = maxScope;
         scopeStack.push(maxScope);
     }
 
@@ -64,12 +65,12 @@ public class SymbolTable {
         SymbolTableRecord record = this.table.getOrDefault(name, null);
 
         while (record != null) {
-            if (record.scope == currScope) {
+            if (record.scope == this.currScope) {
                 return false;
             }
             record = record.next;
         }
-        table.put(name, new SymbolTableRecord(currScope, dec, table.get(name)));
+        table.put(name, new SymbolTableRecord(this.currScope, dec, table.get(name)));
         return true;
     }
 
