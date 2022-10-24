@@ -243,9 +243,11 @@ public class PLPParser implements IParser {
         List<Statement> statements = new ArrayList<>();
         consume();
         IToken fToken = this.token;
+        Boolean isEndDetected = false;
         Statement statement = null;
         while (this.token.getKind() != Kind.EOF) {
             if (this.token.getKind() == Kind.KW_END){
+                isEndDetected = true;
                 if(statement!=null){
                     statements.add(new StatementEmpty(null));
                 }
@@ -259,6 +261,10 @@ public class PLPParser implements IParser {
                 statement = new StatementEmpty(null);
                 consume();
             }
+        }
+
+        if(!isEndDetected){
+            throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
         }
 
         return new StatementBlock(fToken, statements);
