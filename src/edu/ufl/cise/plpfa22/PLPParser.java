@@ -249,7 +249,7 @@ public class PLPParser implements IParser {
             if (this.token.getKind() == Kind.KW_END){
                 isEndDetected = true;
                 if(statement!=null){
-                    statements.add(new StatementEmpty(null));
+                    statements.add(new StatementEmpty(this.token));
                 }
                 consume();
                 break;
@@ -258,7 +258,7 @@ public class PLPParser implements IParser {
             statements.add(statement);
             statement = null;
             if(isSemiColonToken()){
-                statement = new StatementEmpty(null);
+                statement = new StatementEmpty(this.token);
                 consume();
             }
         }
@@ -309,6 +309,7 @@ public class PLPParser implements IParser {
 
 
     private Expression parseExpression() throws PLPException {
+        IToken ftoken = this.token;
         Expression exp1 = parseAdditiveExpression();
 
         while(token.getKind() == Kind.LT || token.getKind() == Kind.GT || token.getKind() == Kind.EQ ||
@@ -316,31 +317,33 @@ public class PLPParser implements IParser {
             IToken op = token;
             consume();
             Expression exp2 = parseAdditiveExpression();
-            exp1 = new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(ftoken, exp1, op, exp2);
         }
         return exp1;
     }
 
     private Expression parseAdditiveExpression() throws PLPException {
+        IToken ftoken = this.token;
         Expression exp1 = parseMultiplicativeExpression();
 
         while(token.getKind() == Kind.PLUS || token.getKind() == Kind.MINUS) {
             IToken op = token;
             consume();
             Expression exp2 = parseMultiplicativeExpression();
-            exp1 = new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(ftoken, exp1, op, exp2);
         }
 
         return exp1;
     }
 
     private Expression parseMultiplicativeExpression() throws PLPException {
+        IToken ftoken = this.token;
         Expression exp1 = parsePrimaryExpression();
         while (token.getKind() == Kind.TIMES || token.getKind() == Kind.DIV || token.getKind() == Kind.MOD) {
             IToken op = token;
             consume();
             Expression exp2 = parsePrimaryExpression();
-            exp1 = new ExpressionBinary(null, exp1, op, exp2);
+            exp1 = new ExpressionBinary(ftoken, exp1, op, exp2);
         }
 
         return exp1;

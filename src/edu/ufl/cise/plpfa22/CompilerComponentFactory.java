@@ -19,4 +19,8 @@ public class CompilerComponentFactory {
     public static ASTVisitor getScopeVisitor(){
         return new PLPScopeVisitor();
     }
+
+    public static ASTVisitor getTypeInferenceVisitor(){
+        return new PLPTypeVisitor();
+    }
 }

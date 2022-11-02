@@ -18,7 +18,7 @@ public class PLPScopeVisitor implements ASTVisitor {
 
     @Override
     public Object visitProgram(Program program, Object arg) throws PLPException {
-        Block block = (Block)program.block;
+        Block block = program.block;
         symbolTable.enterScope();
         block.visit(this,arg);
         symbolTable.leaveScope();
@@ -43,6 +43,10 @@ public class PLPScopeVisitor implements ASTVisitor {
         for(int i=0; i< procDecs.size();i++){
             procDecs.get(i).visit(this,false);
         }
+
+//        for(int i=0; i< procDecs.size();i++){
+//            procDecs.get(i).visit(this,true);
+//        }
 
         for(int i= procDecs.size()-1; i>=0;i--){
             procDecs.get(i).visit(this,true);
