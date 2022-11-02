@@ -1,6 +1,7 @@
 package edu.ufl.cise.plpfa22;
 
 import edu.ufl.cise.plpfa22.ast.Declaration;
+import edu.ufl.cise.plpfa22.ast.Types.Type;
 
 import java.util.*;
 
@@ -10,11 +11,20 @@ public class SymbolTable {
         Declaration dec;
         SymbolTableRecord next;
 
+        Type type;
+
         public SymbolTableRecord(int scope, Declaration dec, SymbolTableRecord next) {
             this.scope = scope;
             this.dec = dec;
             this.next = next;
+        }
 
+        public Type getType() {
+            return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
         }
     }
 
@@ -25,12 +35,14 @@ public class SymbolTable {
     int maxScope;
 
     public SymbolTable() {
-        this.nestLevel = -1;
+        /*this.nestLevel = -1;
         this.maxScope = -1;
         this.currScope = maxScope;
+
+        this.scopeStack = new ArrayDeque<>();
+        this.scopeStack.push(currScope);*/
+        this.resetScopeCounters();
         table = new HashMap<>();
-        scopeStack = new ArrayDeque<>();
-        scopeStack.push(currScope);
     }
 
     public void enterNestLevel() {
@@ -45,6 +57,14 @@ public class SymbolTable {
         return this.nestLevel--;
     }
 
+
+    public void resetScopeCounters(){
+        this.nestLevel = -1;
+        this.maxScope = -1;
+        this.currScope = maxScope;
+        this.scopeStack = new ArrayDeque<>();
+        this.scopeStack.push(currScope);
+    }
 
     public void enterScope() {
         maxScope++;
@@ -86,10 +106,10 @@ public class SymbolTable {
     public SymbolTableRecord findRecord(String name) {
         SymbolTableRecord result = null;
         SymbolTableRecord scanner = this.table.get(name);
-            while (scanner != null && scanner.scope > this.currScope) {
-                scanner = scanner.next;
-            }
-            result = scanner;
+        while (scanner != null && scanner.scope > this.currScope) {
+            scanner = scanner.next;
+        }
+        result = scanner;
         return result;
     }
 
