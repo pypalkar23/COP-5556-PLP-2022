@@ -170,7 +170,7 @@ public class PLPTypeVisitor implements ASTVisitor {
             this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, statementInput.getSourceLocation()));*/
             this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementInput.getSourceLocation());
         }
-        return null;
+        return type;
     }
 
     @Override
@@ -187,7 +187,7 @@ public class PLPTypeVisitor implements ASTVisitor {
             this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementOutput.getSourceLocation());
         }
 
-        return null;
+        return type;
     }
 
     @Override
@@ -240,7 +240,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
 
-        return null;
+        return expType;
     }
 
     @Override
@@ -291,7 +291,7 @@ public class PLPTypeVisitor implements ASTVisitor {
 
     @Override
     public Object visitStatementEmpty(StatementEmpty statementEmpty, Object arg) throws PLPException {
-        return null;
+        return Type.STRING;
     }
 
     @Override
@@ -316,6 +316,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type expectedType = (Type) arg;
         if (expectedType != null && expectedType != Type.NUMBER)
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.BOOLEAN.toString()), expressionNumLit.getSourceLocation().line(), expressionNumLit.getSourceLocation().column());
+        expressionNumLit.setType(Type.NUMBER);
         return Type.NUMBER;
     }
 
@@ -325,7 +326,7 @@ public class PLPTypeVisitor implements ASTVisitor {
 
         if (expectedType != null && expectedType != Type.STRING)
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.STRING.toString()), expressionStringLit.getSourceLocation().line(), expressionStringLit.getSourceLocation().column());
-
+        expressionStringLit.setType(Type.STRING);
         return Type.STRING;
     }
 
@@ -335,7 +336,7 @@ public class PLPTypeVisitor implements ASTVisitor {
 
         if (expectedType != null && expectedType != Type.BOOLEAN)
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.BOOLEAN.toString()), expressionBooleanLit.getSourceLocation().line(), expressionBooleanLit.getSourceLocation().column());
-
+        expressionBooleanLit.setType(Type.BOOLEAN);
         return Type.BOOLEAN;
     }
 
