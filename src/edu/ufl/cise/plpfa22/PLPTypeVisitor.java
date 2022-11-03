@@ -2,6 +2,7 @@ package edu.ufl.cise.plpfa22;
 
 import edu.ufl.cise.plpfa22.ast.*;
 import edu.ufl.cise.plpfa22.ast.Types.Type;
+import edu.ufl.cise.plpfa22.IToken.Kind;
 
 import java.util.HashSet;
 import java.util.List;
@@ -95,10 +96,10 @@ public class PLPTypeVisitor implements ASTVisitor {
         Expression exp = statementAssign.expression;
         Type expType = (Type)exp.visit(this,arg);
         if(ident.getDec() instanceof ConstDec)
-            return new TypeCheckException(TypeCheckUtils.ERROR_REASSIGNMENT_NOT_ALLOWED,ident.getSourceLocation().line(),ident.getSourceLocation().column());
+            throw new TypeCheckException(TypeCheckUtils.ERROR_REASSIGNMENT_NOT_ALLOWED,ident.getSourceLocation().line(),ident.getSourceLocation().column());
 
         if(!(ident.getDec() instanceof VarDec))
-            return new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"VARIABLE"),ident.getSourceLocation().line(),ident.getSourceLocation().column());
+            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"VARIABLE"),ident.getSourceLocation().line(),ident.getSourceLocation().column());
 
         //get expression type
         // get ident type
@@ -111,10 +112,12 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         if(idType==null && expType!=null){
-            ident.getDec().setType(expType);
+            idType = expType;
+            ident.visit(this,expType);
         }
 
         else if(idType!=null && expType==null){
+            expType = idType;
             exp.visit(this,idType);
         }
 
@@ -122,7 +125,7 @@ public class PLPTypeVisitor implements ASTVisitor {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,TypeCheckUtils.PROCEDURE),ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
 
-        return idType;
+        return ident.getDec().getType();
     }
 
     @Override
@@ -136,6 +139,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         if(type!=null && type!=Type.PROCEDURE){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.PROCEDURE),ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
+
         return type;
     }
 
@@ -223,22 +227,75 @@ public class PLPTypeVisitor implements ASTVisitor {
 
     @Override
     public Object visitExpressionBinary(ExpressionBinary expressionBinary, Object arg) throws PLPException {
-        return null;
+        Type expectedType = (Type)arg;
+        Expression exp0 = expressionBinary.e0;
+        IToken op = expressionBinary.op;
+        Expression exp1 = expressionBinary.e1;
+        Object newarg = arg;
+
+        if(expectedType==Type.BOOLEAN && TypeCheckUtils.BOOLEAN_TOKEN_SET.contains(op.getKind())){
+            newarg = null;
+        }
+
+        Type type0 = (Type)exp0.visit(this,newarg);
+        Type type1 = (Type)exp1.visit(this,newarg);
+
+        if(type0==Type.PROCEDURE || type1 == Type.PROCEDURE){
+            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"STRING,BOOLEAN,NUMBER"),expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
+        }
+
+        if(type0!=null && type1==null){
+            exp1.visit(this,type0);
+        }
+
+        if(type0==null && type1!=null){
+            exp0.visit(this,type1);
+        }
+
+        if(type0!=null && type1!=null && (type0!=type1|| !isCompatible(type0,op))){
+            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,type1.toString()),expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
+        }
+
+        if(isFinalPass && (type0==null || type1==null)){
+            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
+        }
+
+
+        if(TypeCheckUtils.BOOLEAN_TOKEN_SET.contains(op.getKind())){
+            expressionBinary.setType(Type.BOOLEAN);
+            return Type.BOOLEAN;
+        }
+        else{
+            expressionBinary.setType(type0);
+            return type0;
+        }
+
     }
 
     @Override
     public Object visitStatementEmpty(StatementEmpty statementEmpty, Object arg) throws PLPException {
-        return null;
+        return Type.STRING;
     }
 
     @Override
     public Object visitExpressionIdent(ExpressionIdent expressionIdent, Object arg) throws PLPException {
-        Type type = expressionIdent.getDec().getType();
-        if(this.isFinalPass && type==null){
+
+        Type expectedType = (Type) arg;
+        Declaration dec = this.symbolTable.findDeclaration(expressionIdent.firstToken.getStringValue());
+
+        if(dec.getType()!=null && expectedType!=null && dec.getType()!=expectedType){
             throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionIdent.getSourceLocation().line(),expressionIdent.getSourceLocation().column());
         }
-        expressionIdent.setType(type);
-        return type;
+        if(dec.getType()==null){
+            dec.setType(expectedType);
+        }
+
+        if(this.isFinalPass && dec.getType()==null){
+            System.out.println(expressionIdent.firstToken.getStringValue());
+            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionIdent.getSourceLocation().line(),expressionIdent.getSourceLocation().column());
+        }
+        expressionIdent.setType(dec.getType());
+        return expressionIdent.getType();
     }
 
     @Override
@@ -269,17 +326,41 @@ public class PLPTypeVisitor implements ASTVisitor {
     public Object visitIdent(Ident ident, Object arg) throws PLPException {
 
         Type expectedType = (Type)arg;
-        Type res = null;
+
         Declaration dec = this.symbolTable.findDeclaration(ident.getFirstToken().getStringValue());
 
-        if(dec.getType()==null){
-            dec.setType(expectedType);
+        Type res = null;
+        if(dec!=null){
+            if(dec.getType()==null){
+                dec.setType(expectedType);
+                res = expectedType;
+            }else{
+                res = dec.getType();
+            }
         }
 
-        else if(expectedType!=null && dec.getType()!=null && dec.getType() != expectedType){
+
+        else if(dec!=null && expectedType!=null && dec.getType()!=null && dec.getType() != expectedType){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
-        return dec.getType();
+        return res;
+    }
+
+
+    public boolean isCompatible(Type type1, IToken op){
+        if(op.getKind() == Kind.PLUS && !TypeCheckUtils.PLUS_TYPES_SET.contains(type1)){
+            return false;
+        }
+        else if(TypeCheckUtils.NUMBER_OP_TOKEN_SET.contains(op) && type1!=Type.NUMBER){
+            return false;
+        }
+        else if(op.getKind()== Kind.TIMES && !TypeCheckUtils.TIMES_TYPES_SET.contains(type1)){
+            return false;
+        }
+        else if(TypeCheckUtils.BOOLEAN_TOKEN_SET.contains(op.getKind()) && !TypeCheckUtils.PLUS_TYPES_SET.contains(type1)){
+            return false;
+        }
+        return true;
     }
 
 
