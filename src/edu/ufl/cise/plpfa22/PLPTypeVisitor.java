@@ -26,11 +26,11 @@ public class PLPTypeVisitor implements ASTVisitor {
         symbolTable.enterScope();
         block.visit(this,arg);
         symbolTable.leaveScope();
-
+        symbolTable.resetScopeCounters();
         this.isFinalPass = true;
         symbolTable.enterScope();
         block.visit(this,arg);
-        symbolTable.enterScope();
+        symbolTable.leaveScope();
 
         return null;
     }
@@ -245,14 +245,14 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         if(type0!=null && type1==null){
-            exp1.visit(this,type0);
+            type1= (Type)exp1.visit(this,type0);
         }
 
-        if(type0==null && type1!=null){
-            exp0.visit(this,type1);
+        else if(type0==null && type1!=null){
+            type0 =(Type)exp0.visit(this,type1);
         }
 
-        if(type0!=null && type1!=null && (type0!=type1|| !isCompatible(type0,op))){
+        if(type0!=null && type1!=null && (type0!=type1 || !isCompatible(type0,op))){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,type1.toString()),expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
         }
 
@@ -290,10 +290,10 @@ public class PLPTypeVisitor implements ASTVisitor {
             dec.setType(expectedType);
         }
 
-        if(this.isFinalPass && dec.getType()==null){
+        /*if(this.isFinalPass && dec.getType()==null){
             System.out.println(expressionIdent.firstToken.getStringValue());
             throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionIdent.getSourceLocation().line(),expressionIdent.getSourceLocation().column());
-        }
+        }*/
         expressionIdent.setType(dec.getType());
         return expressionIdent.getType();
     }
