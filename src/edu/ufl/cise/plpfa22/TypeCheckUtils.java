@@ -34,11 +34,6 @@ public class TypeCheckUtils {
 
     public static final Set<Type> TIMES_TYPES_SET = new HashSet<>(Arrays.asList(TIMES_TYPES));
 
-    public static String getStringMismatchError(String[] expected, String actual){
-        String TYPE_MISMATCH = "Expected %s found %s";
-        String expectedString=String.join(" OR ",expected);
-        return String.format(TYPE_MISMATCH,expectedString,actual);
-    }
     public static Type getConstType(ConstDec constDec){
         Object val = constDec.val;
         if(val instanceof Integer){
@@ -50,5 +45,19 @@ public class TypeCheckUtils {
         return Type.STRING;
     }
 
-
+    public static boolean isCompatible(Type type1, IToken op){
+        if(op.getKind() == Kind.PLUS && !PLUS_TYPES_SET.contains(type1)){
+            return false;
+        }
+        else if(NUMBER_OP_TOKEN_SET.contains(op) && type1!=Type.NUMBER){
+            return false;
+        }
+        else if(op.getKind()== Kind.TIMES && !TIMES_TYPES_SET.contains(type1)){
+            return false;
+        }
+        else if(BOOLEAN_TOKEN_SET.contains(op.getKind()) && !PLUS_TYPES_SET.contains(type1)){
+            return false;
+        }
+        return true;
+    }
 }

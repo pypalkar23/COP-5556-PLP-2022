@@ -4,33 +4,57 @@ import edu.ufl.cise.plpfa22.ast.*;
 import edu.ufl.cise.plpfa22.ast.Types.Type;
 import edu.ufl.cise.plpfa22.IToken.Kind;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 
 public class PLPTypeVisitor implements ASTVisitor {
     private SymbolTable symbolTable;
-    private boolean isFinalPass;
-
-    private Set<String> procedureTracker;
-
+    private boolean isFirstPass;
+    private Integer prevCounter;
+    private Integer currCounter;
+   private List<TypeCheckErrorRecord> errors;
     public PLPTypeVisitor(){
-        this.isFinalPass = false;
         this.symbolTable = new SymbolTable();
+        this.currCounter = 0;
+        this.isFirstPass = true;
+        this.errors = new ArrayList<>();
     }
 
     @Override
     public Object visitProgram(Program program, Object arg) throws PLPException {
         Block block= program.block;
 
-        symbolTable.enterScope();
+        while(true){
+            symbolTable.enterScope();
+            block.visit(this,arg);
+            symbolTable.leaveScope();
+
+            symbolTable.resetScopeCounters();
+            this.isFirstPass = false;
+            if(currCounter == 0)
+                    break;
+
+            if(prevCounter!=null){
+                if(prevCounter == currCounter){
+                    TypeCheckErrorRecord error = errors.get(0);
+                    throw new TypeCheckException(error.getMsg(),error.getSourceLocation().line(),error.getSourceLocation().column());
+                }
+            }
+
+            prevCounter = currCounter;
+            currCounter = 0;
+            this.errors = new ArrayList<>();
+        }
+        /*symbolTable.enterScope();
         block.visit(this,arg);
         symbolTable.leaveScope();
         symbolTable.resetScopeCounters();
+
         this.isFinalPass = true;
         symbolTable.enterScope();
         block.visit(this,arg);
-        symbolTable.leaveScope();
+        symbolTable.leaveScope();*/
 
         return null;
     }
@@ -58,7 +82,7 @@ public class PLPTypeVisitor implements ASTVisitor {
 
     @Override
     public Object visitVarDec(VarDec varDec, Object arg) throws PLPException {
-        if(!isFinalPass)
+        if(isFirstPass)
             symbolTable.insert(varDec.ident.getStringValue(),varDec);
         return null;
     }
@@ -67,7 +91,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type type =  TypeCheckUtils.getConstType(constDec);
         constDec.setType(type);
 
-        if(!isFinalPass){
+        if(isFirstPass){
             symbolTable.insert(constDec.ident.getStringValue(),constDec);
         }
         return type;
@@ -78,10 +102,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         IToken ident = procDec.ident;
 
         procDec.setType(Type.PROCEDURE);
-        if(!isFinalPass){
+        if(isFirstPass){
             this.symbolTable.insert(ident.getStringValue(),procDec);
         }
-
 
         Block block = procDec.block;
         symbolTable.enterScope();
@@ -101,11 +124,6 @@ public class PLPTypeVisitor implements ASTVisitor {
         if(!(ident.getDec() instanceof VarDec))
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"VARIABLE"),ident.getSourceLocation().line(),ident.getSourceLocation().column());
 
-        //get expression type
-        // get ident type
-        //if ident is not variable throw error
-        //if ident type is not decided assign expression type
-        //if ident type is decided and expression type is mismatched throw error
         if(idType!=null && expType!=null){
             if(idType!=expType)
                 throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,idType.toString()),statementAssign.getSourceLocation().line(),statementAssign.getSourceLocation().column());
@@ -121,8 +139,10 @@ public class PLPTypeVisitor implements ASTVisitor {
             exp.visit(this,idType);
         }
 
-        if(isFinalPass && idType==null && expType==null){
-            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,TypeCheckUtils.PROCEDURE),ident.getSourceLocation().line(),ident.getSourceLocation().column());
+        if(/*isFinalPass && */idType==null && expType==null){
+            currCounter++;
+            errors.add(new TypeCheckErrorRecord(String.format(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,TypeCheckUtils.PROCEDURE),ident.getSourceLocation()));
+            //throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,TypeCheckUtils.PROCEDURE),ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
 
         return ident.getDec().getType();
@@ -133,8 +153,10 @@ public class PLPTypeVisitor implements ASTVisitor {
         Ident ident = statementCall.ident;
 
         Type type = (Type)ident.visit(this,arg);
-        if(type == null && this.isFinalPass){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,ident.getSourceLocation().line(),ident.getSourceLocation().column());
+        if(type == null /*&& this.isFinalPass*/){
+            currCounter++;
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,ident.getSourceLocation()));
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,ident.getSourceLocation().line(),ident.getSourceLocation().column());
         }
         if(type!=null && type!=Type.PROCEDURE){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.PROCEDURE),ident.getSourceLocation().line(),ident.getSourceLocation().column());
@@ -152,10 +174,12 @@ public class PLPTypeVisitor implements ASTVisitor {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"BOOLEAN,NUMBER,STRING"),statementInput.getSourceLocation().line(),statementInput.getSourceLocation().column());
         }
 
-        if(this.isFinalPass && type==null){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementInput.getSourceLocation().line(),statementInput.getSourceLocation().column());
+        if(/*this.isFinalPass &&*/ type==null){
+            currCounter++;
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementInput.getSourceLocation().line(),statementInput.getSourceLocation().column());
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementInput.getSourceLocation()));
         }
-        return type;
+        return null;
     }
 
     @Override
@@ -166,11 +190,13 @@ public class PLPTypeVisitor implements ASTVisitor {
         if(type!=null && type==Type.PROCEDURE){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,"BOOLEAN,NUMBER,STRING"),statementOutput.getSourceLocation().line(),statementOutput.getSourceLocation().column());
         }
-        if(this.isFinalPass && type==null){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementOutput.getSourceLocation().line(),statementOutput.getSourceLocation().column());
+        if(/*this.isFinalPass &&*/ type==null){
+            currCounter++;
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementOutput.getSourceLocation().line(),statementOutput.getSourceLocation().column());
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementOutput.getSourceLocation()));
         }
 
-        return type;
+        return null;
     }
 
     @Override
@@ -188,17 +214,21 @@ public class PLPTypeVisitor implements ASTVisitor {
         Statement statement = statementIf.statement;
         Type expType =  (Type)exp.visit(this,arg);
         Type statementType = (Type)statement.visit(this,arg);
-        if(isFinalPass && expType == null){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation().line(),exp.getSourceLocation().column());
+        if(/*isFinalPass &&*/ expType == null){
+            currCounter++;
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation().line(),exp.getSourceLocation().column());
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation()));
         }
         if(exp!=null && expType!=Type.BOOLEAN){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
         }
 
-        if(isFinalPass && statementType==null){
-            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
-        }
-        return expType;
+        /*if(statementType==null){
+            currCounter++;
+            //throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
+            errors.add(new TypeCheckErrorRecord(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation()));
+        }*/
+        return null;
     }
 
     @Override
@@ -208,21 +238,25 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type expType =  (Type)exp.visit(this,arg);
         Type statementType = (Type)statement.visit(this,arg);
 
-        if(isFinalPass && expType!=Type.BOOLEAN){
+        /*if(isFinalPass &&  expType!=Type.BOOLEAN){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
-        }
-        if(isFinalPass && expType == null){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation().line(),exp.getSourceLocation().column());
+        }*/
+        if(/*isFinalPass &&*/ expType == null){
+            currCounter++;
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation().line(),exp.getSourceLocation().column());
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation()));
         }
         if(exp!=null && expType!=Type.BOOLEAN){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
         }
 
-        if(isFinalPass && statementType==null){
-            throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
-        }
+        /*if(statementType==null){
+            currCounter++;
+            errors.add(new TypeCheckErrorRecord(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation()));
+            //throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,TypeCheckUtils.BOOLEAN),exp.getSourceLocation().line(),exp.getSourceLocation().column());
+        }*/
 
-        return expType;
+        return null;
     }
 
     @Override
@@ -252,12 +286,14 @@ public class PLPTypeVisitor implements ASTVisitor {
             type0 =(Type)exp0.visit(this,type1);
         }
 
-        if(type0!=null && type1!=null && (type0!=type1 || !isCompatible(type0,op))){
+        if(type0!=null && type1!=null && (type0!=type1 || !TypeCheckUtils.isCompatible(type0,op))){
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH,type1.toString()),expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
         }
 
-        if(isFinalPass && (type0==null || type1==null)){
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
+        if(/*isFinalPass &&*/ (type0==null || type1==null)){
+            currCounter++;
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionBinary.getSourceLocation()));
+            //throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionBinary.getSourceLocation().line(),expressionBinary.getSourceLocation().column());
         }
 
 
@@ -274,7 +310,7 @@ public class PLPTypeVisitor implements ASTVisitor {
 
     @Override
     public Object visitStatementEmpty(StatementEmpty statementEmpty, Object arg) throws PLPException {
-        return Type.STRING;
+        return null;
     }
 
     @Override
@@ -290,10 +326,6 @@ public class PLPTypeVisitor implements ASTVisitor {
             dec.setType(expectedType);
         }
 
-        /*if(this.isFinalPass && dec.getType()==null){
-            System.out.println(expressionIdent.firstToken.getStringValue());
-            throw new TypeCheckException(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionIdent.getSourceLocation().line(),expressionIdent.getSourceLocation().column());
-        }*/
         expressionIdent.setType(dec.getType());
         return expressionIdent.getType();
     }
@@ -347,21 +379,7 @@ public class PLPTypeVisitor implements ASTVisitor {
     }
 
 
-    public boolean isCompatible(Type type1, IToken op){
-        if(op.getKind() == Kind.PLUS && !TypeCheckUtils.PLUS_TYPES_SET.contains(type1)){
-            return false;
-        }
-        else if(TypeCheckUtils.NUMBER_OP_TOKEN_SET.contains(op) && type1!=Type.NUMBER){
-            return false;
-        }
-        else if(op.getKind()== Kind.TIMES && !TypeCheckUtils.TIMES_TYPES_SET.contains(type1)){
-            return false;
-        }
-        else if(TypeCheckUtils.BOOLEAN_TOKEN_SET.contains(op.getKind()) && !TypeCheckUtils.PLUS_TYPES_SET.contains(type1)){
-            return false;
-        }
-        return true;
-    }
+
 
 
 }
