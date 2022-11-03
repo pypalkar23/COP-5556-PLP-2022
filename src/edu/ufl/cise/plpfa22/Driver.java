@@ -10,19 +10,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Driver {
     public static void main(String[] args) {
         String input = """
-                    PROCEDURE p;
-                    	PROCEDURE q;;;
-
-                    PROCEDURE q;
-                    	PROCEDURE p;;;
-                    .
-                    """;
+                VAR x,y,z;
+                BEGIN
+                    z := "hello";
+                    ! z;
+                    z := x;
+                    ! z
+                END
+                .
+                """;
         try {
             IParser parser = CompilerComponentFactory.getParser(CompilerComponentFactory.getLexer(input));
             ASTNode ast = parser.parse();
             ASTVisitor scopes = CompilerComponentFactory.getScopeVisitor();
             ast.visit(scopes, null);
-            assertThat("", ast, instanceOf(Program.class));
+            ASTVisitor types = CompilerComponentFactory.getTypeInferenceVisitor();
+            //ast.visit(types, null);
+            System.out.println(PrettyPrintVisitor.AST2String(ast));
+            /*assertThat("", ast, instanceOf(Program.class));
             Block v0 = ((Program) ast).block;
             assertThat("", v0, instanceOf(Block.class));
             List<ConstDec> v1 = ((Block) v0).constDecs;
@@ -84,8 +89,9 @@ public class Driver {
             Statement v27 = ((Block) v17).statement;
             assertThat("", v27, instanceOf(StatementEmpty.class));
             Statement v28 = ((Block) v0).statement;
-            assertThat("", v28, instanceOf(StatementEmpty.class));
+            assertThat("", v28, instanceOf(StatementEmpty.class));*/
             System.out.println("Mandar");
+
         } catch (Exception e) {
             System.out.println("In exception "+e.getMessage());
             e.printStackTrace();
