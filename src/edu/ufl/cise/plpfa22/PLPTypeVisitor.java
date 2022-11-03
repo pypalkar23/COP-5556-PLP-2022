@@ -108,8 +108,10 @@ public class PLPTypeVisitor implements ASTVisitor {
     public Object visitStatementAssign(StatementAssign statementAssign, Object arg) throws PLPException {
         Ident ident = statementAssign.ident;
         Type idType = (Type) ident.visit(this, arg);
+
         Expression exp = statementAssign.expression;
         Type expType = (Type) exp.visit(this, arg);
+
         if (ident.getDec() instanceof ConstDec)
             throw new TypeCheckException(TypeCheckUtils.ERROR_REASSIGNMENT_NOT_ALLOWED, ident.getSourceLocation().line(), ident.getSourceLocation().column());
 
@@ -186,9 +188,12 @@ public class PLPTypeVisitor implements ASTVisitor {
     @Override
     public Object visitStatementBlock(StatementBlock statementBlock, Object arg) throws PLPException {
         List<Statement> statements = statementBlock.statements;
+
         for (Statement statement : statements) {
             statement.visit(this, arg);
         }
+
+
         return null;
     }
 
@@ -196,8 +201,10 @@ public class PLPTypeVisitor implements ASTVisitor {
     public Object visitStatementIf(StatementIf statementIf, Object arg) throws PLPException {
         Expression exp = statementIf.expression;
         Statement statement = statementIf.statement;
+
         Type expType = (Type) exp.visit(this, arg);
         Type statementType = (Type) statement.visit(this, arg);
+
         if (expType == null) {
             currCounter++;
             errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, exp.getSourceLocation()));
@@ -213,6 +220,7 @@ public class PLPTypeVisitor implements ASTVisitor {
     public Object visitStatementWhile(StatementWhile statementWhile, Object arg) throws PLPException {
         Expression exp = statementWhile.expression;
         Statement statement = statementWhile.statement;
+
         Type expType = (Type) exp.visit(this, arg);
         Type statementType = (Type) statement.visit(this, arg);
 
@@ -306,27 +314,29 @@ public class PLPTypeVisitor implements ASTVisitor {
     @Override
     public Object visitExpressionStringLit(ExpressionStringLit expressionStringLit, Object arg) throws PLPException {
         Type expectedType = (Type) arg;
+
         if (expectedType != null && expectedType != Type.STRING)
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.STRING.toString()), expressionStringLit.getSourceLocation().line(), expressionStringLit.getSourceLocation().column());
+
         return Type.STRING;
     }
 
     @Override
     public Object visitExpressionBooleanLit(ExpressionBooleanLit expressionBooleanLit, Object arg) throws PLPException {
         Type expectedType = (Type) arg;
+
         if (expectedType != null && expectedType != Type.BOOLEAN)
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.BOOLEAN.toString()), expressionBooleanLit.getSourceLocation().line(), expressionBooleanLit.getSourceLocation().column());
+
         return Type.BOOLEAN;
     }
 
     @Override
     public Object visitIdent(Ident ident, Object arg) throws PLPException {
-
         Type expectedType = (Type) arg;
-
         Declaration dec = this.symbolTable.findDeclaration(ident.getFirstToken().getStringValue());
-
         Type res = null;
+
         if (dec != null) {
             if (dec.getType() == null) {
                 dec.setType(expectedType);
@@ -337,6 +347,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         } else if (dec != null && expectedType != null && dec.getType() != null && dec.getType() != expectedType) {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, dec.getType().toString()), ident.getSourceLocation().line(), ident.getSourceLocation().column());
         }
+
         return res;
     }
 
