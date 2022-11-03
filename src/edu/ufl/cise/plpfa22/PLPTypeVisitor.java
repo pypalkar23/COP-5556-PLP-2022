@@ -2,6 +2,7 @@ package edu.ufl.cise.plpfa22;
 
 import edu.ufl.cise.plpfa22.ast.*;
 import edu.ufl.cise.plpfa22.ast.Types.Type;
+import edu.ufl.cise.plpfa22.IToken.SourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,24 +27,24 @@ public class PLPTypeVisitor implements ASTVisitor {
         Block block = program.block;
 
         while (true) {
-            symbolTable.enterScope();
+            this.symbolTable.enterScope();
             block.visit(this, arg);
-            symbolTable.leaveScope();
+            this.symbolTable.leaveScope();
 
-            symbolTable.resetScopeCounters();
+            this.symbolTable.resetScopeCounters();
             this.isFirstPass = false;
-            if (currCounter == 0)
+            if (this.currCounter == 0)
                 break;
 
-            if (prevCounter != null) {
-                if (prevCounter == currCounter) {
-                    TypeCheckErrorRecord error = errors.get(0);
+            if (this.prevCounter != null) {
+                if (this.prevCounter == currCounter) {
+                    TypeCheckErrorRecord error = this.errors.get(0);
                     throw new TypeCheckException(error.getMsg(), error.getSourceLocation().line(), error.getSourceLocation().column());
                 }
             }
 
-            prevCounter = currCounter;
-            currCounter = 0;
+            this.prevCounter = currCounter;
+            this.currCounter = 0;
             this.errors = new ArrayList<>();
         }
 
@@ -73,8 +74,8 @@ public class PLPTypeVisitor implements ASTVisitor {
 
     @Override
     public Object visitVarDec(VarDec varDec, Object arg) throws PLPException {
-        if (isFirstPass)
-            symbolTable.insert(varDec.ident.getStringValue(), varDec);
+        if (this.isFirstPass)
+            this.symbolTable.insert(varDec.ident.getStringValue(), varDec);
         return null;
     }
 
@@ -82,8 +83,8 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type type = TypeCheckUtils.getConstType(constDec);
         constDec.setType(type);
 
-        if (isFirstPass) {
-            symbolTable.insert(constDec.ident.getStringValue(), constDec);
+        if (this.isFirstPass) {
+            this.symbolTable.insert(constDec.ident.getStringValue(), constDec);
         }
         return type;
     }
@@ -93,14 +94,14 @@ public class PLPTypeVisitor implements ASTVisitor {
         IToken ident = procDec.ident;
 
         procDec.setType(Type.PROCEDURE);
-        if (isFirstPass) {
+        if (this.isFirstPass) {
             this.symbolTable.insert(ident.getStringValue(), procDec);
         }
 
         Block block = procDec.block;
-        symbolTable.enterScope();
+        this.symbolTable.enterScope();
         block.visit(this, arg);
-        symbolTable.leaveScope();
+        this.symbolTable.leaveScope();
         return procDec.getType();
     }
 
@@ -130,8 +131,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         if (idType == null && expType == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, ident.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, ident.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,ident.getSourceLocation());
         }
 
         return ident.getDec().getType();
@@ -143,8 +145,9 @@ public class PLPTypeVisitor implements ASTVisitor {
 
         Type type = (Type) ident.visit(this, arg);
         if (type == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, ident.getSourceLocation()));
+            /*this.currCounter++;
+            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, ident.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,ident.getSourceLocation());
         }
         if (type != null && type != Type.PROCEDURE) {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.PROCEDURE.toString()), ident.getSourceLocation().line(), ident.getSourceLocation().column());
@@ -163,8 +166,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         if (type == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, statementInput.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, statementInput.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementInput.getSourceLocation());
         }
         return null;
     }
@@ -178,8 +182,9 @@ public class PLPTypeVisitor implements ASTVisitor {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, "BOOLEAN,NUMBER,STRING"), statementOutput.getSourceLocation().line(), statementOutput.getSourceLocation().column());
         }
         if (type == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, statementOutput.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, statementOutput.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,statementOutput.getSourceLocation());
         }
 
         return null;
@@ -206,8 +211,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type statementType = (Type) statement.visit(this, arg);
 
         if (expType == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, exp.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, exp.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation());
         }
         if (exp != null && expType != Type.BOOLEAN) {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.BOOLEAN.toString()), exp.getSourceLocation().line(), exp.getSourceLocation().column());
@@ -225,8 +231,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         Type statementType = (Type) statement.visit(this, arg);
 
         if (expType == null) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, exp.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, exp.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,exp.getSourceLocation());
         }
         if (exp != null && expType != Type.BOOLEAN) {
             throw new TypeCheckException(String.format(TypeCheckUtils.ERROR_TYPE_MISMATCH, Type.BOOLEAN.toString()), exp.getSourceLocation().line(), exp.getSourceLocation().column());
@@ -266,8 +273,9 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         if ((type0 == null || type1 == null)) {
-            currCounter++;
-            errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, expressionBinary.getSourceLocation()));
+            /*this.currCounter++;
+            this.errors.add(new TypeCheckErrorRecord(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION, expressionBinary.getSourceLocation()));*/
+            this.recordError(TypeCheckUtils.ERROR_INCOMPLETE_INFORMATION,expressionBinary.getSourceLocation());
         }
 
 
@@ -349,6 +357,12 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         return res;
+    }
+
+
+    void recordError(String msg, SourceLocation sourceLocation){
+        this.currCounter++;
+        this.errors.add(new TypeCheckErrorRecord(msg, sourceLocation));
     }
 
 

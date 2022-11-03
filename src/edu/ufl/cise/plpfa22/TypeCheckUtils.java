@@ -10,10 +10,15 @@ import java.util.Set;
 
 public class TypeCheckUtils {
     public static final String DEC_VARIABLE = "VARIABLE";
+
     public static final String ERROR_TYPE_MISMATCH = "INCOMPATIABLE_TYPE EXPECTED - %s";
+
     public static final String ERROR_INCOMPLETE_INFORMATION = "CANNOT DETERMINE TYPE";
+
     public static final String ERROR_REASSIGNMENT_NOT_ALLOWED = "REASSIGNMENT NOT ALLOWED";
+
     private static final Kind[] CONDITIONAL_TOKENS = new Kind[]{Kind.EQ, Kind.NEQ, Kind.LT, Kind.LE, Kind.GT, Kind.GE};
+
     public static final Set<Kind> BOOLEAN_TOKEN_SET = new HashSet<>(Arrays.asList(CONDITIONAL_TOKENS));
 
     public static final Kind[] NUMBER_OP_TOKENS = new Kind[]{Kind.MINUS, Kind.DIV, Kind.MOD};
