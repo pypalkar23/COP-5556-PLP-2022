@@ -23,4 +23,8 @@ public class CompilerComponentFactory {
     public static ASTVisitor getTypeInferenceVisitor(){
         return new PLPTypeVisitor();
     }
+
+    public static ASTVisitor getCodeGenVisitor(String className, String packageName, String sourceFileName){
+        return new CodeGenVisitor(className,packageName,sourceFileName);
+    }
 }
