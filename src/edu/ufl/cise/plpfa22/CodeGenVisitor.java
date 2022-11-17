@@ -1,6 +1,5 @@
 package edu.ufl.cise.plpfa22;
 
-import edu.ufl.cise.plpfa22.PLPException;
 import edu.ufl.cise.plpfa22.ast.*;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -123,7 +122,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
     @Override
     public Object visitStatementIf(StatementIf statementIf, Object arg) throws
             PLPException {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -138,11 +137,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         MethodVisitor mv = (MethodVisitor) arg;
         Type argType = expressionBinary.e0.getType();
         Kind op = expressionBinary.op.getKind();
-        expressionBinary.e0.visit(this, arg);
-        expressionBinary.e1.visit(this, arg);
+
         Label conditionNotMet = new Label();
         switch (argType) {
             case NUMBER -> {
+                expressionBinary.e0.visit(this, arg);
+                expressionBinary.e1.visit(this, arg);
                 switch (op) {
                     case PLUS -> mv.visitInsn(IADD);
                     case MINUS -> mv.visitInsn(ISUB);
@@ -153,61 +153,22 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                         mv.visitJumpInsn(IF_ICMPNE, conditionNotMet);
                     }
                     case NEQ -> {
-                        //Label labelNumEqBr = new Label();
                         mv.visitJumpInsn(IF_ICMPEQ, conditionNotMet);
-                        /*mv.visitInsn(ICONST_1);
-                        Label labelPostNumNotEq = new Label();
-                        mv.visitJumpInsn(GOTO, labelPostNumNotEq);
-                        mv.visitLabel(labelNumEqBr);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitLabel(labelPostNumNotEq);*/
                     }
                     case LT -> {
-                        //throw new UnsupportedOperationException();
-                        //Label labelNumEqBr = new Label();
                         mv.visitJumpInsn(IF_ICMPGE, conditionNotMet);
-                        /*mv.visitInsn(ICONST_1);
-                        Label labelPostNumNotEq = new Label();
-                        mv.visitJumpInsn(GOTO, labelPostNumNotEq);
-                        mv.visitLabel(labelNumEqBr);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitLabel(labelPostNumNotEq);*/
                     }
                     case LE -> {
-                        //throw new UnsupportedOperationException();
-                        //Label labelNumEqBr = new Label();
                         mv.visitJumpInsn(IF_ICMPGT, conditionNotMet);
-                        /*mv.visitInsn(ICONST_1);
-                        Label labelPostNumNotEq = new Label();
-                        mv.visitJumpInsn(GOTO, labelPostNumNotEq);
-                        mv.visitLabel(labelNumEqBr);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitLabel(labelPostNumNotEq);*/
                     }
                     case GT -> {
-                        //throw new UnsupportedOperationException();
-                        //Label labelNumEqBr = new Label();
                         mv.visitJumpInsn(IF_ICMPLE, conditionNotMet);
-                        /*mv.visitInsn(ICONST_1);
-                        Label labelPostNumNotEq = new Label();
-                        mv.visitJumpInsn(GOTO, labelPostNumNotEq);
-                        mv.visitLabel(labelNumEqBr);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitLabel(labelPostNumNotEq);*/
                     }
                     case GE -> {
-                        //throw new UnsupportedOperationException();
-                        //Label labelNumEqBr = new Label();
                         mv.visitJumpInsn(IF_ICMPLT, conditionNotMet);
-                        /*mv.visitInsn(ICONST_1);
-                        Label labelPostNumNotEq = new Label();
-                        mv.visitJumpInsn(GOTO, labelPostNumNotEq);
-                        mv.visitLabel(labelNumEqBr);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitLabel(labelPostNumNotEq);*/
                     }
                     default -> {
-                        throw new IllegalStateException("code gen bug in visitExpressionBinary NUMBER");
+                        throw new UnsupportedOperationException("Cannot Support this for Number Expressions");
                     }
                 }
                 if (TypeCheckUtils.BOOLEAN_TOKEN_SET.contains(op)) {
@@ -220,68 +181,66 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                 }
             }
             case BOOLEAN -> {
-                switch(op){
-                    case EQ->{
-                        mv.visitJumpInsn(IF_ICMPNE, conditionNotMet);
+                expressionBinary.e0.visit(this, arg);
+                Label start = new Label();
+                switch (op) {
+                    case PLUS -> {
+                        mv.visitJumpInsn(IFNE, start);
+                        expressionBinary.e1.visit(this, arg);
+                        mv.visitJumpInsn(IFNE, start);
                     }
-                    case NEQ->{
-                        mv.visitJumpInsn(IF_ICMPEQ, conditionNotMet);
+                    case TIMES -> {
+                        mv.visitJumpInsn(IFEQ, start);
+                        expressionBinary.e1.visit(this, arg);
+                        mv.visitJumpInsn(IFEQ, start);
                     }
-                    case LT->{
-                        mv.visitJumpInsn(IF_ICMPGE, conditionNotMet);
+                    case EQ -> {
+                        expressionBinary.e1.visit(this, arg);
+                        start = new Label();
+                        mv.visitJumpInsn(IF_ICMPNE, start);
                     }
-                    case LE->{
-                        mv.visitJumpInsn(IF_ICMPGT, conditionNotMet);
+                    case NEQ -> {
+                        expressionBinary.e1.visit(this, arg);
+                        mv.visitInsn(IXOR);
                     }
-                    case GT->{
-                        mv.visitJumpInsn(IF_ICMPLE, conditionNotMet);
+                    case LT -> {
+                        mv.visitJumpInsn(IFNE, start);
+                        expressionBinary.e1.visit(this, arg);
+                        mv.visitJumpInsn(IFEQ, start);
                     }
-                    case GE->{
-                        mv.visitJumpInsn(IF_ICMPLT, conditionNotMet);
+                    case LE, GT, GE -> {
+                        mv.visitJumpInsn(IFEQ, start);
+                        expressionBinary.e1.visit(this, arg);
+                        mv.visitJumpInsn(IFNE, start);
+                    }
+
+                    default -> {
+                        throw new UnsupportedOperationException("Cannot Support this for Boolean Expressions");
                     }
                 }
-                mv.visitInsn(ICONST_1);
-                Label conditionMet = new Label();
-                mv.visitJumpInsn(GOTO, conditionMet);
-                mv.visitLabel(conditionNotMet);
-                mv.visitInsn(ICONST_0);
-                mv.visitLabel(conditionMet);
 
-                //throw new UnsupportedOperationException();
+                if (op == Kind.PLUS || op == Kind.LE || op == Kind.GE) {
+                    mv.visitInsn(ICONST_0);
+                    Label end = new Label();
+                    mv.visitJumpInsn(GOTO, end);
+                    mv.visitLabel(start);
+                    mv.visitInsn(ICONST_1);
+                    mv.visitLabel(end);
+                }
+                if (op == Kind.TIMES || op == Kind.GT || op == Kind.LT || op == Kind.EQ) {
+                    mv.visitInsn(ICONST_1);
+                    Label end = new Label();
+                    mv.visitJumpInsn(GOTO, end);
+                    mv.visitLabel(start);
+                    mv.visitInsn(ICONST_0);
+                    mv.visitLabel(end);
+                }
             }
             case STRING -> {
-                switch(op){
-                    case PLUS -> {
-                        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "concat", "(Ljava/lang/String;)Ljava/lang/String;", false);
-                    }
-                    case EQ ->{
-                        mv.visitJumpInsn(IF_ACMPNE, conditionNotMet);
-                    }
-                    case NEQ->{
-                        mv.visitJumpInsn(IF_ACMPEQ, conditionNotMet);
-                    }
-                    case LT,LE->{
-                        mv.visitInsn(SWAP);
-                        mv.visitMethodInsn(INVOKEVIRTUAL,"java/lang/String","startsWith","(Ljava/lang/String;)Z",false);
-                    }
-                    case GT,GE->{
-                        mv.visitMethodInsn(INVOKEVIRTUAL,"java/lang/String","startsWith","(Ljava/lang/String;)Z",false);
-                    }
 
-                }
-
-                    mv.visitInsn(ICONST_0);
-                    Label conditionMet = new Label();
-                    mv.visitJumpInsn(GOTO, conditionMet);
-                    mv.visitLabel(conditionNotMet);
-                    mv.visitInsn(ICONST_1);
-                    mv.visitLabel(conditionMet);
-
-
-                //throw new UnsupportedOperationException();
             }
             default -> {
-                throw new IllegalStateException("code gen bug in visitExpressionBinary");
+                throw new UnsupportedOperationException("Cannot Support this for Binary Expression");
             }
         }
         return null;
