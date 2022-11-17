@@ -122,6 +122,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
     @Override
     public Object visitStatementIf(StatementIf statementIf, Object arg) throws
             PLPException {
+        MethodVisitor mv = (MethodVisitor) arg;
+        Label statementBlockLabel = new Label();
+        statementIf.expression.visit(this, arg);
+        mv.visitJumpInsn(IFEQ, statementBlockLabel);
+        statementIf.statement.visit(this, arg);
+        mv.visitLabel(statementBlockLabel);
         return null;
     }
 
@@ -193,6 +199,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                         mv.visitJumpInsn(IFEQ, start);
                         expressionBinary.e1.visit(this, arg);
                         mv.visitJumpInsn(IFEQ, start);
+
                     }
                     case EQ -> {
                         expressionBinary.e1.visit(this, arg);
@@ -221,23 +228,52 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
                 if (op == Kind.PLUS || op == Kind.LE || op == Kind.GE) {
                     mv.visitInsn(ICONST_0);
-                    Label end = new Label();
-                    mv.visitJumpInsn(GOTO, end);
+                    Label label45 = new Label();
+                    mv.visitJumpInsn(GOTO, label45);
                     mv.visitLabel(start);
                     mv.visitInsn(ICONST_1);
-                    mv.visitLabel(end);
+                    mv.visitLabel(label45);
                 }
                 if (op == Kind.TIMES || op == Kind.GT || op == Kind.LT || op == Kind.EQ) {
                     mv.visitInsn(ICONST_1);
-                    Label end = new Label();
-                    mv.visitJumpInsn(GOTO, end);
+                    Label afterAnd = new Label();
+                    mv.visitJumpInsn(GOTO, afterAnd);
                     mv.visitLabel(start);
                     mv.visitInsn(ICONST_0);
-                    mv.visitLabel(end);
+                    mv.visitLabel(afterAnd);
                 }
             }
             case STRING -> {
+                expressionBinary.e0.visit(this, arg);
+                expressionBinary.e1.visit(this, arg);
+                switch (op) {
+                    case PLUS -> {
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_CONCAT_OP, "(Ljava/lang/String;)Ljava/lang/String;", false);
+                    }
+                    case EQ, NEQ -> {
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
+                    }
+                    case LT, LE -> {
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                    }
+                    case GT, GE -> {
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                    }
+                    default -> {
+                        throw new UnsupportedOperationException("Cannot Support this for String Expressions");
+                    }
+                }
 
+                if (op == Kind.NEQ || op == Kind.LT || op == Kind.GT) {
+                    Label start = new Label();
+                    mv.visitJumpInsn(IFEQ, start);
+                    mv.visitInsn(ICONST_0);
+                    Label end = new Label();
+                    mv.visitJumpInsn(GOTO, end);
+                    mv.visitLabel(start);
+                    mv.visitInsn(ICONST_1);
+                    mv.visitLabel(end);
+                }
             }
             default -> {
                 throw new UnsupportedOperationException("Cannot Support this for Binary Expression");
