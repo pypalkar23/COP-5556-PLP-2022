@@ -201,6 +201,9 @@ public class PLPParser implements IParser {
             case SEMI ->{
                 stmt = new StatementEmpty(this.token);
             }
+            default ->{
+                throw new SyntaxException(ParserUtils.SYNTAX_ERROR,token.getSourceLocation().line(),token.getSourceLocation().column());
+            }
         }
 
         return stmt;
@@ -244,6 +247,7 @@ public class PLPParser implements IParser {
         consume();
         IToken fToken = this.token;
         Boolean isEndDetected = false;
+        Boolean isStatementExpected = true;
         Statement statement = null;
         while (this.token.getKind() != Kind.EOF) {
             if (this.token.getKind() == Kind.KW_END){
@@ -254,10 +258,14 @@ public class PLPParser implements IParser {
                 consume();
                 break;
             }
+            if(!isStatementExpected)
+                throw new SyntaxException(ParserUtils.SYNTAX_ERROR, token.getSourceLocation().line(), token.getSourceLocation().column());
+            isStatementExpected = false;
             statement = parseStatement();
             statements.add(statement);
             statement = null;
             if(isSemiColonToken()){
+                isStatementExpected = true;
                 statement = new StatementEmpty(this.token);
                 consume();
             }
