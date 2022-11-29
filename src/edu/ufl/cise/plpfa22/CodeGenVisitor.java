@@ -210,12 +210,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                         expressionBinary.e1.visit(this, arg);
                         mv.visitInsn(IXOR);
                     }
-                    case LT -> {
+                    case LT,GE -> {
                         mv.visitJumpInsn(IFNE, start);
                         expressionBinary.e1.visit(this, arg);
                         mv.visitJumpInsn(IFEQ, start);
                     }
-                    case LE, GT, GE -> {
+                    case LE, GT -> {
                         mv.visitJumpInsn(IFEQ, start);
                         expressionBinary.e1.visit(this, arg);
                         mv.visitJumpInsn(IFNE, start);
@@ -254,6 +254,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
                     }
                     case LT, LE -> {
+                        mv.visitInsn(SWAP);
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
                     }
                     case GT, GE -> {
