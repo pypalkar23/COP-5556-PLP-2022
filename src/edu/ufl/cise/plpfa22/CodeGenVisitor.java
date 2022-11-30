@@ -253,13 +253,21 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                     case EQ, NEQ -> {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
                     }
-                    case LT, LE -> {
+                    case LE,GT -> {
                         mv.visitInsn(SWAP);
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
                     }
-                    case GT, GE -> {
+                    case GE -> {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
                     }
+                    case LT ->{
+                        mv.visitInsn(SWAP);
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                    }
+                    /*case GT ->{
+                        mv.visitInsn(SWAP);
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                    }*/
                     default -> {
                         throw new UnsupportedOperationException("Cannot Support this for String Expressions");
                     }
