@@ -26,7 +26,9 @@ public class Ident extends ASTNode {
 		return dec;
 	}
 
-
+	public String getStringIdentifier() {
+		return String.valueOf(firstToken.getText());
+	}
 	@Override
 	public String toString() {
 		return "Ident [dec=" + dec + ", firstToken=" + firstToken + "]";
@@ -48,4 +50,6 @@ public class Ident extends ASTNode {
 	public void setNest(int nest) {
 		this.nest = nest;
 	}
+
+
 }

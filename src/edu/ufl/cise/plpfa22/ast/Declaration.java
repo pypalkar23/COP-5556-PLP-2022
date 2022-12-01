@@ -8,12 +8,22 @@ import edu.ufl.cise.plpfa22.IToken;
 import edu.ufl.cise.plpfa22.ast.Types.Type;
 
 public abstract class Declaration extends ASTNode {
-	
+
 	Type type;
 	int nest;
+	String setFullClassName;
+
+	public String getSetFullClassName() {
+		return setFullClassName;
+	}
+
+	public void setSetFullClassName(String setFullClassName) {
+		this.setFullClassName = setFullClassName;
+	}
 
 	public Declaration(IToken firstToken) {
 		super(firstToken);
+		nest = -1;
 	}
 
 	public Type getType() {
@@ -24,13 +34,13 @@ public abstract class Declaration extends ASTNode {
 		this.type = type;
 	}
 
-	public int getNest() {
-		return nest;
-	}
-
 	public void setNest(int nest) {
 		this.nest = nest;
 	}
 
+	public int getNest() {
+		return nest;
+	}
 
+	abstract public String shortDesc();
 }

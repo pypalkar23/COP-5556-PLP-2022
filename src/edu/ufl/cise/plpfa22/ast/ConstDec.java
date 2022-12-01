@@ -33,4 +33,9 @@ public class ConstDec extends Declaration {
 				+ (type != null ? "type=" + type : "") + "]";
 	}
 
+	@Override
+	public String shortDesc() {
+		return toString();
+	}
+
 }

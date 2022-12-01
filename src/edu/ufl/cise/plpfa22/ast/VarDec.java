@@ -8,7 +8,7 @@ import edu.ufl.cise.plpfa22.IToken;
 import edu.ufl.cise.plpfa22.PLPException;
 
 public class VarDec extends Declaration {
-	
+
 	public final IToken ident;
 
 	public VarDec(IToken firstToken, IToken id) {
@@ -21,12 +21,26 @@ public class VarDec extends Declaration {
 		return v.visitVarDec(this, arg);
 	}
 
+//	@Override
+//	public String toString() {
+//		return "VarDec [" + (ident != null ? "ident=" + ident + ", " : "") + (type != null ? "type=" + type : "") + "]";
+//	}
+
+
+
 	@Override
-	public String toString() {
-		return "VarDec [" + (ident != null ? "ident=" + ident + ", " : "") + (type != null ? "type=" + type : "") + "]";
+	public String shortDesc() {
+		return toString();
 	}
 
+	@Override
+	public String toString() {
+		return "VarDec [ident=" + ident + ", nest=" + nest + "]";
+	}
 
+	public String getVarName() {
+		return String.valueOf(ident.getText());
+	}
 
 
 

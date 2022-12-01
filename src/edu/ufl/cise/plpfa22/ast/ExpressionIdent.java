@@ -47,4 +47,8 @@ public class ExpressionIdent extends Expression {
 		this.nest = nest;
 	}
 
+	public String getName() {
+		return String.valueOf(firstToken.getText());
+	}
+
 }
