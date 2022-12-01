@@ -41,12 +41,11 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
     final String classDescriptor;
     final String superClass;
 
-    GenClassWriter superClassWriter;
+    LinkedList<GenClassWriter> genList = new LinkedList<>();
+    LinkedList<String> trackerList = new LinkedList<>();
+    LinkedList<GenClass> resultList = new LinkedList<>();
 
-    LinkedList<GenClassWriter> classWriters = new LinkedList<>();
-    LinkedList<String> classNames = new LinkedList<>();
-
-    LinkedList<GenClass> classList = new LinkedList<>();
+    GenClassWriter mainWriter;
 
     public CodeGenVisitor(String className, String packageName, String sourceFileName) {
         super();
@@ -85,26 +84,25 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         //create a classWriter and visit it
         NameVisitor setNamesVisitor = new NameVisitor(superClass);
         program.visit(setNamesVisitor, superClass);
-        superClassWriter = new GenClassWriter(ClassWriter.COMPUTE_FRAMES);
-        classWriters.add(superClassWriter);
-        classNames.add(superClass);
+        mainWriter = new GenClassWriter(ClassWriter.COMPUTE_FRAMES);
+        genList.add(mainWriter);
+        trackerList.add(superClass);
         //Hint:  if you get failures in the visitMaxs, try creating a ClassWriter with 0
         // instead of ClassWriter.COMPUTE_FRAMES.  The result will not be a valid classfile,
         // but you will be able to print it so you can see the instructions.After fixing,
         // restore ClassWriter.COMPUTE_FRAMES
-        superClassWriter.visit(V17, ACC_PUBLIC | ACC_SUPER, superClass, null, "java/lang/Object", CodeGenHelpers.interfacesList);
-        superClassWriter.setClassName(superClass);
+        mainWriter.visit(V17, ACC_PUBLIC | ACC_SUPER, superClass, null, CodeGenHelpers.OBJECT_TYPE, CodeGenHelpers.interfacesList);
+        mainWriter.setClassName(superClass);
 
-        MethodVisitor first = superClassWriter.visitMethod(ACC_PUBLIC, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, null, null);
+        MethodVisitor first = mainWriter.visitMethod(ACC_PUBLIC, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, null, null);
         first.visitCode();
         first.visitVarInsn(ALOAD, 0);
-        first.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
+        first.visitMethodInsn(INVOKESPECIAL, CodeGenHelpers.OBJECT_TYPE, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
         first.visitInsn(RETURN);
         first.visitMaxs(1, 1);
         first.visitEnd();
 
-
-        MethodVisitor second = superClassWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "main", "([Ljava/lang/String;)V", null, null);
+        MethodVisitor second = mainWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, "main", "([Ljava/lang/String;)V", null, null);
         second.visitCode();
         second.visitTypeInsn(NEW, superClass);
         second.visitInsn(DUP);
@@ -114,12 +112,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         second.visitMaxs(0, 0);
         second.visitEnd();
         //visit the block, passing it the methodVisitor
-        program.block.visit(this, superClassWriter);
+        program.block.visit(this, mainWriter);
         //finish up the class
-        superClassWriter.visitEnd();
-        byte[] bytecode = superClassWriter.toByteArray();
-        classList.addFirst(new GenClass(superClass, bytecode));
-        return classList;
+        mainWriter.visitEnd();
+        byte[] bytecode = mainWriter.toByteArray();
+        resultList.addFirst(new GenClass(superClass, bytecode));
+        return resultList;
     }
 
     @Override
@@ -151,23 +149,23 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         int procDecNest = procDec.getNest();
 
         int statementCallNest = statementCall.ident.getNest();
-        String parentClassStr = classNames.get(statementCallNest);
+        String parentClassStr = trackerList.get(statementCallNest);
 
         mv.visitTypeInsn(NEW, procDecClassStr);
         mv.visitInsn(DUP);
         mv.visitVarInsn(ALOAD, 0);
 
         if (procDecNest == statementCallNest) {
-            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, "(" + CodeGenUtils.toJVMClassDesc(parentClassStr) + ")V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, String.format("(%s)V",CodeGenUtils.toJVMClassDesc(parentClassStr)), false);
         } else {
-            String tempClassName = classNames.get(procDecNest);
+            String tempClassStr = trackerList.get(procDecNest);
             for (int i = statementCallNest; i > procDecNest; i--) {
-                String temp = classNames.get(i);
-                tempClassName = classNames.get(i - 1);
+                String temp = trackerList.get(i);
+                tempClassStr = trackerList.get(i - 1);
                 String referenceClassName = CodeGenHelpers.THIS_PREFIX + (i - 1);
-                mv.visitFieldInsn(GETFIELD, temp, referenceClassName, CodeGenUtils.toJVMClassDesc(tempClassName));
+                mv.visitFieldInsn(GETFIELD, temp, referenceClassName, CodeGenUtils.toJVMClassDesc(tempClassStr));
             }
-            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, "(" + CodeGenUtils.toJVMClassDesc(tempClassName) + ")V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, String.format("(%s)V",CodeGenUtils.toJVMClassDesc(tempClassStr)), false);
         }
         mv.visitMethodInsn(INVOKEVIRTUAL, procDecClassStr, CodeGenHelpers.RUN_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
         return null;
@@ -207,24 +205,28 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
     @Override
     public Object visitStatementIf(StatementIf statementIf, Object arg) throws PLPException {
         MethodVisitor mv = (MethodVisitor) arg;
-        Label afterIf = new Label();
-        statementIf.expression.visit(this, arg);
-        mv.visitJumpInsn(IFEQ, afterIf);
-        statementIf.statement.visit(this, arg);
-        mv.visitLabel(afterIf);
+        Statement statement = statementIf.statement;
+        Expression expression = statementIf.expression;
+        Label statementBlockLabel = new Label();
+        expression.visit(this, arg);
+        mv.visitJumpInsn(IFEQ, statementBlockLabel);
+        statement.visit(this, arg);
+        mv.visitLabel(statementBlockLabel);
         return null;
     }
 
     @Override
     public Object visitStatementWhile(StatementWhile statementWhile, Object arg) throws PLPException {
         MethodVisitor mv = (MethodVisitor) arg;
+        Statement statement = statementWhile.statement;
+        Expression expression = statementWhile.expression;
         Label condition = new Label();
         Label whileBlock = new Label();
         mv.visitJumpInsn(GOTO, condition);
         mv.visitLabel(whileBlock);
-        statementWhile.statement.visit(this, arg);
+        statement.visit(this, arg);
         mv.visitLabel(condition);
-        statementWhile.expression.visit(this, arg);
+        expression.visit(this, arg);
         mv.visitJumpInsn(IFNE, whileBlock);
         return null;
     }
@@ -404,16 +406,16 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
             }
             mv.visitLdcInsn(res);
         } else {
-            VarDec vdec = (VarDec) dec;
+            VarDec varDec = (VarDec) dec;
             int currNestLevel = expressionIdent.getNest();
-            int declarationNestLevel = vdec.getNest();
-            String decClassName = classNames.get(declarationNestLevel);
+            int declarationNestLevel = varDec.getNest();
+            String decClassName = trackerList.get(declarationNestLevel);
             mv.visitVarInsn(ALOAD, 0);
             for (int i = currNestLevel; i > declarationNestLevel; i--) {
-                String nName = classNames.get(i);
-                String tName = classNames.get(i - 1);
+                String prevClass = trackerList.get(i);
+                String currClass = trackerList.get(i - 1);
                 String fullReferenceDesc = CodeGenHelpers.THIS_PREFIX + (i - 1);
-                mv.visitFieldInsn(GETFIELD, nName, fullReferenceDesc, CodeGenUtils.toJVMClassDesc(tName));
+                mv.visitFieldInsn(GETFIELD, prevClass, fullReferenceDesc, CodeGenUtils.toJVMClassDesc(currClass));
             }
             mv.visitFieldInsn(GETFIELD, decClassName, expressionIdent.getName(), typeDescriptor);
 
@@ -442,24 +444,22 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         return null;
     }
 
-
-
     @Override
     public Object visitProcedure(ProcDec procDec, Object arg) throws PLPException {
         String currClassName = procDec.getSetFullClassName();
         String parentName = procDec.getParentClass();
-        classNames.add(currClassName);
+        trackerList.add(currClassName);
         GenClassWriter procedureWriter = new GenClassWriter(ClassWriter.COMPUTE_FRAMES);
         procedureWriter.setClassName(currClassName);
-        classWriters.add(procedureWriter);
+        genList.add(procedureWriter);
         procedureWriter.visit(V17, ACC_PUBLIC, currClassName, null, CodeGenHelpers.OBJECT_TYPE, CodeGenHelpers.interfacesList);
         procedureWriter.visitNestHost(superClass);
-        superClassWriter.visitNestMember(currClassName);
+        mainWriter.visitNestMember(currClassName);
         String currRef = CodeGenHelpers.THIS_PREFIX + procDec.getNest();
         FieldVisitor fieldVisitor = procedureWriter.visitField(ACC_FINAL | ACC_SYNTHETIC, currRef, CodeGenUtils.toJVMClassDesc(parentName), null, null);
         fieldVisitor.visitEnd();
 
-        MethodVisitor procVisitor = procedureWriter.visitMethod(0, "<init>", CodeGenHelpers.getInitDescriptor(parentName), null, null);
+        MethodVisitor procVisitor = procedureWriter.visitMethod(0, CodeGenHelpers.INIT_MODE, CodeGenHelpers.getInitDescriptor(parentName), null, null);
         procVisitor.visitCode();
         procVisitor.visitVarInsn(ALOAD, 0);
         procVisitor.visitVarInsn(ALOAD, 1);
@@ -472,9 +472,28 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         procDec.block.visit(this, procedureWriter);
         procedureWriter.visitEnd();
         byte[] byteCode = procedureWriter.toByteArray();
-        classList.add(new GenClass(currClassName, byteCode));
-        classNames.removeLast();
-        classWriters.removeLast();
+        resultList.add(new GenClass(currClassName, byteCode));
+        trackerList.removeLast();
+        genList.removeLast();
+        return null;
+    }
+
+    @Override
+    public Object visitIdent(Ident ident, Object arg) throws PLPException {
+        MethodVisitor mv = (MethodVisitor) arg;
+        Declaration dec = ident.getDec();
+        int identNest = ident.getNest();
+        int declarationNest = dec.getNest();
+        String declarationClassName = trackerList.get(declarationNest);
+        mv.visitVarInsn(ALOAD, 0);
+        for (int i = identNest; i > declarationNest; i--) {
+            String prevLevelClass = trackerList.get(i);
+            String currLevelClass = trackerList.get(i - 1);
+            String fullRefDesc = CodeGenHelpers.THIS_PREFIX + (i - 1);
+            mv.visitFieldInsn(GETFIELD, prevLevelClass, fullRefDesc, CodeGenUtils.toJVMClassDesc(currLevelClass));
+        }
+        mv.visitInsn(SWAP);
+        mv.visitFieldInsn(PUTFIELD, declarationClassName, ident.getStringIdentifier(), CodeGenHelpers.getDescriptorForType(dec.getType()));
         return null;
     }
 
@@ -488,23 +507,6 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         return null;
     }
 
-    @Override
-    public Object visitIdent(Ident ident, Object arg) throws PLPException {
-        MethodVisitor mv = (MethodVisitor) arg;
-        Declaration dec = ident.getDec();
-        int identNest = ident.getNest();
-        int declarationNest = dec.getNest();
-        String declarationClassName = classNames.get(declarationNest);
-        mv.visitVarInsn(ALOAD, 0);
-        for (int i = identNest; i > declarationNest; i--) {
-            String prevLevelClass = classNames.get(i);
-            String currLevelClass = classNames.get(i - 1);
-            String fullRefDesc = CodeGenHelpers.THIS_PREFIX + (i - 1);
-            mv.visitFieldInsn(GETFIELD, prevLevelClass, fullRefDesc, CodeGenUtils.toJVMClassDesc(currLevelClass));
-        }
-        mv.visitInsn(SWAP);
-        mv.visitFieldInsn(PUTFIELD, declarationClassName, ident.getStringIdentifier(), CodeGenHelpers.getDescriptorForType(dec.getType()));
-        return null;
-    }
+
 
 }
