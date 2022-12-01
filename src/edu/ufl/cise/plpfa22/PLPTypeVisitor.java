@@ -308,6 +308,7 @@ public class PLPTypeVisitor implements ASTVisitor {
         }
 
         expressionIdent.setType(dec.getType());
+        expressionIdent.getDec().setType(dec.getType());
         return expressionIdent.getType();
     }
 
