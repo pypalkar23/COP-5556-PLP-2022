@@ -34,7 +34,6 @@ import edu.ufl.cise.plpfa22.ast.Types.Type;
 import edu.ufl.cise.plpfa22.ast.VarDec;
 
 
-
 public class CodeGenVisitor implements ASTVisitor, Opcodes {
     final String packageName;
     final String className;
@@ -96,10 +95,10 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         superClassWriter.visit(V17, ACC_PUBLIC | ACC_SUPER, superClass, null, "java/lang/Object", CodeGenHelpers.interfacesList);
         superClassWriter.setClassName(superClass);
 
-        MethodVisitor first = superClassWriter.visitMethod(ACC_PUBLIC, CodeGenHelpers.INIT_MODE, "()V", null, null);
+        MethodVisitor first = superClassWriter.visitMethod(ACC_PUBLIC, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, null, null);
         first.visitCode();
         first.visitVarInsn(ALOAD, 0);
-        first.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", CodeGenHelpers.INIT_MODE, "()V", false);
+        first.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
         first.visitInsn(RETURN);
         first.visitMaxs(1, 1);
         first.visitEnd();
@@ -109,8 +108,8 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         second.visitCode();
         second.visitTypeInsn(NEW, superClass);
         second.visitInsn(DUP);
-        second.visitMethodInsn(INVOKESPECIAL, superClass, CodeGenHelpers.INIT_MODE, "()V", false);
-        second.visitMethodInsn(INVOKEVIRTUAL, superClass, CodeGenHelpers.RUN_MODE, "()V", false);
+        second.visitMethodInsn(INVOKESPECIAL, superClass, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
+        second.visitMethodInsn(INVOKEVIRTUAL, superClass, CodeGenHelpers.RUN_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
         second.visitInsn(RETURN);
         second.visitMaxs(0, 0);
         second.visitEnd();
@@ -445,20 +444,15 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         String currClassName = procDec.getSetFullClassName();
         String parentName = procDec.getParentClass();
         classNames.add(currClassName);
-
         GenClassWriter procedureWriter = new GenClassWriter(ClassWriter.COMPUTE_FRAMES);
         procedureWriter.setClassName(currClassName);
         classWriters.add(procedureWriter);
-        procedureWriter.visit(V17, ACC_PUBLIC, currClassName, null, "java/lang/Object", CodeGenHelpers.interfacesList);
-
+        procedureWriter.visit(V17, ACC_PUBLIC, currClassName, null, CodeGenHelpers.OBJECT_TYPE, CodeGenHelpers.interfacesList);
         procedureWriter.visitNestHost(superClass);
         superClassWriter.visitNestMember(currClassName);
-
         String currRef = CodeGenHelpers.THIS_PREFIX + procDec.getNest();
-
         FieldVisitor fieldVisitor = procedureWriter.visitField(ACC_FINAL | ACC_SYNTHETIC, currRef, CodeGenUtils.toJVMClassDesc(parentName), null, null);
         fieldVisitor.visitEnd();
-
 
         MethodVisitor procVisitor = procedureWriter.visitMethod(0, "<init>", CodeGenHelpers.getInitDescriptor(parentName), null, null);
         procVisitor.visitCode();
@@ -466,14 +460,11 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         procVisitor.visitVarInsn(ALOAD, 1);
         procVisitor.visitFieldInsn(PUTFIELD, currClassName, currRef, CodeGenUtils.toJVMClassDesc(parentName));
         procVisitor.visitVarInsn(ALOAD, 0);
-        procVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        procVisitor.visitMethodInsn(INVOKESPECIAL, CodeGenHelpers.OBJECT_TYPE, CodeGenHelpers.INIT_MODE, CodeGenHelpers.VOID_DESCRIPTOR, false);
         procVisitor.visitInsn(RETURN);
         procVisitor.visitMaxs(0, 0);
         procVisitor.visitEnd();
-
-
         procDec.block.visit(this, procedureWriter);
-
         procedureWriter.visitEnd();
         byte[] byteCode = procedureWriter.toByteArray();
         classList.add(new GenClass(currClassName, byteCode));

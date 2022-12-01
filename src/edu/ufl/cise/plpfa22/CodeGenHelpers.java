@@ -4,6 +4,8 @@ import edu.ufl.cise.plpfa22.ast.Types.Type;
 
 public class CodeGenHelpers {
     public static final String STRING_TYPE = "java/lang/String";
+
+    public static final String OBJECT_TYPE = "java/lang/Object";
     public static final String STRING_DESCRIPTOR = String.format("L%s;",STRING_TYPE);
     public static final String STRING_CONCAT_OP = "concat";
     public static final String STRING_EQUALS_OP = "equals";
