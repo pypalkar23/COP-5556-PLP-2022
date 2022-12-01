@@ -39,7 +39,7 @@ public class ProcDec extends Declaration {
 		this.parentClass = enclosingClass;
 	}
 
-	public String shortDesc() {
+	public String getAnotherDesc() {
 		return "ProcDec [" + (ident != null ? "ident=" + ident + ", " : "") + "]"+ " nest=" + nest + "\n  ";
 	}
 

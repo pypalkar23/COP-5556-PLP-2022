@@ -389,15 +389,20 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         MethodVisitor mv = (MethodVisitor) arg;
         Declaration dec = expressionIdent.getDec();
         Type type = dec.getType();
-        String jvmType = CodeGenHelpers.getDescriptorForType(type);
+        String typeDescriptor = CodeGenHelpers.getDescriptorForType(type);
         if (dec instanceof ConstDec) {
-            ConstDec cdec = (ConstDec) dec;
-            Object val = cdec.val;
+            ConstDec constDec = (ConstDec) dec;
+            Object res = constDec.val;
             if (type.equals(Type.BOOLEAN)) {
-                boolean bval = ((Boolean) val).booleanValue();
-                val = Integer.valueOf(bval ? 1 : 0);
+                Boolean temp = (Boolean) res;
+                if(temp.booleanValue() == true){
+                    res = 1;
+                }
+                else{
+                    res = 0;
+                }
             }
-            mv.visitLdcInsn(val);
+            mv.visitLdcInsn(res);
         } else {
             VarDec vdec = (VarDec) dec;
             int currNestLevel = expressionIdent.getNest();
@@ -410,7 +415,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                 String fullReferenceDesc = CodeGenHelpers.THIS_PREFIX + (i - 1);
                 mv.visitFieldInsn(GETFIELD, nName, fullReferenceDesc, CodeGenUtils.toJVMClassDesc(tName));
             }
-            mv.visitFieldInsn(GETFIELD, decClassName, expressionIdent.getName(), jvmType);
+            mv.visitFieldInsn(GETFIELD, decClassName, expressionIdent.getName(), typeDescriptor);
 
         }
         return null;
@@ -489,7 +494,6 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         Declaration dec = ident.getDec();
         int identNest = ident.getNest();
         int declarationNest = dec.getNest();
-        String currClassName = classNames.get(identNest);
         String declarationClassName = classNames.get(declarationNest);
         mv.visitVarInsn(ALOAD, 0);
         for (int i = identNest; i > declarationNest; i--) {

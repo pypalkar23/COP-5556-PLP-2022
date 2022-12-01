@@ -29,7 +29,7 @@ public class VarDec extends Declaration {
 
 
 	@Override
-	public String shortDesc() {
+	public String getAnotherDesc() {
 		return toString();
 	}
 

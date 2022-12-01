@@ -42,5 +42,5 @@ public abstract class Declaration extends ASTNode {
 		return nest;
 	}
 
-	abstract public String shortDesc();
+	abstract public String getAnotherDesc();
 }

@@ -34,7 +34,7 @@ public class ConstDec extends Declaration {
 	}
 
 	@Override
-	public String shortDesc() {
+	public String getAnotherDesc() {
 		return toString();
 	}
 
