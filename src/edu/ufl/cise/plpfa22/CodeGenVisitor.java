@@ -322,19 +322,19 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 
                 if (op == Kind.PLUS || op == Kind.LE || op == Kind.GE) {
                     mv.visitInsn(ICONST_0);
-                    Label label45 = new Label();
-                    mv.visitJumpInsn(GOTO, label45);
+                    Label end = new Label();
+                    mv.visitJumpInsn(GOTO, end);
                     mv.visitLabel(start);
                     mv.visitInsn(ICONST_1);
-                    mv.visitLabel(label45);
+                    mv.visitLabel(end);
                 }
                 if (op == Kind.TIMES || op == Kind.GT || op == Kind.LT || op == Kind.EQ) {
                     mv.visitInsn(ICONST_1);
-                    Label afterAnd = new Label();
-                    mv.visitJumpInsn(GOTO, afterAnd);
+                    Label end = new Label();
+                    mv.visitJumpInsn(GOTO, end);
                     mv.visitLabel(start);
                     mv.visitInsn(ICONST_0);
-                    mv.visitLabel(afterAnd);
+                    mv.visitLabel(end);
                 }
             }
             case STRING -> {
@@ -344,10 +344,21 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                     case PLUS -> {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_CONCAT_OP, "(Ljava/lang/String;)Ljava/lang/String;", false);
                     }
-                    case EQ, NEQ -> {
+                    case EQ-> {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
                     }
-                    case LE,GT -> {
+                    case NEQ ->{
+                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
+                        Label start = new Label();
+                        mv.visitJumpInsn(IFEQ, start);
+                        mv.visitInsn(ICONST_0);
+                        Label end = new Label();
+                        mv.visitJumpInsn(GOTO, end);
+                        mv.visitLabel(start);
+                        mv.visitInsn(ICONST_1);
+                        mv.visitLabel(end);
+                    }
+                    case LE-> {
                         mv.visitInsn(SWAP);
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
                     }
@@ -355,27 +366,35 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
                         mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
                     }
                     case LT ->{
+                        mv.visitInsn(DUP2);
+                        mv.visitMethodInsn(INVOKEVIRTUAL,  CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
+                        Label start = new Label();
+                        mv.visitJumpInsn(IFNE, start);
                         mv.visitInsn(SWAP);
-                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                        mv.visitMethodInsn(INVOKEVIRTUAL,  CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                        Label end = new Label();
+                        mv.visitJumpInsn(GOTO, end);
+                        mv.visitLabel(start);
+                        mv.visitInsn(POP2);
+                        mv.visitInsn(ICONST_0);
+                        mv.visitLabel(end);
                     }
-                    /*case GT ->{
-                        mv.visitInsn(SWAP);
-                        mv.visitMethodInsn(INVOKEVIRTUAL, CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_STARTS_WITH_OP, "(Ljava/lang/String;)Z", false);
-                    }*/
+                    case GT ->{
+                        mv.visitInsn(DUP2);
+                        mv.visitMethodInsn(INVOKEVIRTUAL,  CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_EQUALS_OP, "(Ljava/lang/Object;)Z", false);
+                        Label start = new Label();
+                        mv.visitJumpInsn(IFNE, start);
+                        mv.visitMethodInsn(INVOKEVIRTUAL,  CodeGenHelpers.STRING_TYPE, CodeGenHelpers.STRING_ENDS_WITH_OP, "(Ljava/lang/String;)Z", false);
+                        Label end = new Label();
+                        mv.visitJumpInsn(GOTO, end);
+                        mv.visitLabel(start);
+                        mv.visitInsn(POP2);
+                        mv.visitInsn(ICONST_0);
+                        mv.visitLabel(end);
+                    }
                     default -> {
                         throw new UnsupportedOperationException("Cannot Support this for String Expressions");
                     }
-                }
-
-                if (op == Kind.NEQ || op == Kind.LT || op == Kind.GT) {
-                    Label start = new Label();
-                    mv.visitJumpInsn(IFEQ, start);
-                    mv.visitInsn(ICONST_0);
-                    Label end = new Label();
-                    mv.visitJumpInsn(GOTO, end);
-                    mv.visitLabel(start);
-                    mv.visitInsn(ICONST_1);
-                    mv.visitLabel(end);
                 }
             }
             default -> {
