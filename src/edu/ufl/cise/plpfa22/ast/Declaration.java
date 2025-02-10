@@ -4,7 +4,7 @@
 
 package edu.ufl.cise.plpfa22.ast;
 
-import edu.ufl.cise.plpfa22.IToken;
+import edu.ufl.cise.plpfa22.interfaces.IToken;
 import edu.ufl.cise.plpfa22.ast.Types.Type;
 
 public abstract class Declaration extends ASTNode {

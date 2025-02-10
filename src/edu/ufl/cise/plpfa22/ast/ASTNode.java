@@ -3,9 +3,9 @@
  */
 package edu.ufl.cise.plpfa22.ast;
 
-import edu.ufl.cise.plpfa22.IToken;
-import edu.ufl.cise.plpfa22.IToken.SourceLocation;
-import edu.ufl.cise.plpfa22.PLPException;
+import edu.ufl.cise.plpfa22.interfaces.IToken;
+import edu.ufl.cise.plpfa22.interfaces.IToken.SourceLocation;
+import edu.ufl.cise.plpfa22.exceptions.PLPException;
 
 public abstract class ASTNode {
 	

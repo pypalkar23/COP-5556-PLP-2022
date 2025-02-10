@@ -2,17 +2,68 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="56fe6e13-b00d-406e-aa25-8f2e62fbb7dc" name="Changes" comment="Initial Commit">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/junit_4_13_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CompilerComponentFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ILexer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/IToken.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/Lexer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexerTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexicalException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/junit_4_13_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/junit_4_13_2.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/COP-5556-PLP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/COP-5556-PLP.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/CodeGenTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenTests2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/CodeGenTests2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/CodeGenUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CompilerComponentFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CompilerComponentFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/Driver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/Driver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ILexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/ILexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/IParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/IParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/IToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/IToken.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexerTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/LexerTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexerUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexicalException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/LexicalException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/PLPException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPLexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPScopeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPScopeVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPToken.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPTypeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPTypeVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ParserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/ParserTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ParserUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/ScopeException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/ScopeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/ScopeUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/SymbolTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/SyntaxException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/SyntaxException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckErrorRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/TypeCheckErrorRecord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/TypeCheckException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/TypeCheckUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/TypeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Block.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ConstDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ConstDec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Declaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Declaration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Expression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Expression.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBinary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBinary.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBooleanLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBooleanLit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionIdent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionIdent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionNumLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionNumLit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionStringLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionStringLit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Ident.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Ident.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/NameVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/NameVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/PrettyPrintVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/PrettyPrintVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ProcDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ProcDec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Program.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Program.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Statement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Statement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementAssign.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementAssign.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementBlock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementCall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementCall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementEmpty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementEmpty.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementIf.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementIf.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementInput.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementOutput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementOutput.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementWhile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementWhile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VarDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VarDec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VoidVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VoidVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/javaFiles" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,25 +91,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;true&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "true",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "go.import.settings.migrated": "true",
+    "last_opened_file_path": "/Users/mandar/code/COP-5556-PLP-2022",
+    "project.structure.last.edited": "Libraries",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

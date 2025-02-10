@@ -3,14 +3,17 @@ package edu.ufl.cise.plpfa22;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.ufl.cise.plpfa22.exceptions.PLPException;
+import edu.ufl.cise.plpfa22.utils.CodeGenUtils;
+import edu.ufl.cise.plpfa22.utils.TypeCheckUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Opcodes;
 import edu.ufl.cise.plpfa22.ast.ASTVisitor;
-import edu.ufl.cise.plpfa22.CodeGenUtils.GenClass;
-import edu.ufl.cise.plpfa22.IToken.Kind;
+import edu.ufl.cise.plpfa22.utils.CodeGenUtils.GenClass;
+import edu.ufl.cise.plpfa22.interfaces.IToken.Kind;
 import edu.ufl.cise.plpfa22.ast.*;
 import edu.ufl.cise.plpfa22.ast.Block;
 import edu.ufl.cise.plpfa22.ast.ConstDec;
@@ -156,7 +159,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         mv.visitVarInsn(ALOAD, 0);
 
         if (procDecNest == statementCallNest) {
-            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, String.format("(%s)V",CodeGenUtils.toJVMClassDesc(parentClassStr)), false);
+            mv.visitMethodInsn(INVOKESPECIAL, procDecClassStr, CodeGenHelpers.INIT_MODE, String.format("(%s)V", CodeGenUtils.toJVMClassDesc(parentClassStr)), false);
         } else {
             String tempClassStr = trackerList.get(procDecNest);
             for (int i = statementCallNest; i > procDecNest; i--) {

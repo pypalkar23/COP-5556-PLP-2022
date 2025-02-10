@@ -1,6 +1,6 @@
 package edu.ufl.cise.plpfa22.ast;
 
-import edu.ufl.cise.plpfa22.PLPException;
+import edu.ufl.cise.plpfa22.exceptions.PLPException;
 
 import java.util.List;
 

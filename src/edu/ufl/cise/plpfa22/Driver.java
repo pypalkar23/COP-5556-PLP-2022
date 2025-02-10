@@ -1,12 +1,8 @@
 package edu.ufl.cise.plpfa22;
 
 import edu.ufl.cise.plpfa22.ast.*;
+import edu.ufl.cise.plpfa22.interfaces.IParser;
 
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 public class Driver {
     public static void main(String[] args) {
         String input = """
