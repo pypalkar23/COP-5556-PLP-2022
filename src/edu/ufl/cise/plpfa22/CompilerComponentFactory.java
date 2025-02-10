@@ -6,10 +6,7 @@
 package edu.ufl.cise.plpfa22;
 
 import edu.ufl.cise.plpfa22.ast.ASTVisitor;
-import edu.ufl.cise.plpfa22.implementations.PLPLexer;
-import edu.ufl.cise.plpfa22.implementations.PLPParser;
-import edu.ufl.cise.plpfa22.implementations.PLPScopeVisitor;
-import edu.ufl.cise.plpfa22.implementations.PLPTypeVisitor;
+import edu.ufl.cise.plpfa22.implementations.*;
 import edu.ufl.cise.plpfa22.interfaces.ILexer;
 import edu.ufl.cise.plpfa22.interfaces.IParser;
 

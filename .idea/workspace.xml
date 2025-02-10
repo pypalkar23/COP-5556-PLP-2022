@@ -1,69 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="56fe6e13-b00d-406e-aa25-8f2e62fbb7dc" name="Changes" comment="Initial Commit">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/junit_4_13_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/junit_4_13_2.xml" afterDir="false" />
+    <list default="true" id="56fe6e13-b00d-406e-aa25-8f2e62fbb7dc" name="Changes" comment="Restructuring Code Repo">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/COP-5556-PLP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/COP-5556-PLP.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenHelpers.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/CodeGenTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenTests2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/CodeGenTests2.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/CodeGenUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenHelpers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/CodeGenHelpers.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CodeGenVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/CodeGenVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CompilerComponentFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/CompilerComponentFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/Driver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/Driver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ILexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/ILexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/IParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/IParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/IToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/interfaces/IToken.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexerTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/LexerTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexerUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/LexicalException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/LexicalException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/PLPException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPLexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPScopeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPScopeVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPToken.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/PLPTypeVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/PLPTypeVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ParserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/ParserTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ParserUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/ScopeException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/ScopeTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ScopeUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/ScopeUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/SymbolTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/SyntaxException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/SyntaxException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckErrorRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/TypeCheckErrorRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/exceptions/TypeCheckException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeCheckUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/utils/TypeCheckUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/TypeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/test/TypeTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ASTVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Block.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ConstDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ConstDec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Declaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Declaration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Expression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Expression.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBinary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBinary.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBooleanLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionBooleanLit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionIdent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionIdent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionNumLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionNumLit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionStringLit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ExpressionStringLit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Ident.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Ident.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/NameVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/NameVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/PrettyPrintVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/PrettyPrintVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ProcDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/ProcDec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Program.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Program.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Statement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/Statement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementAssign.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementAssign.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementBlock.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementCall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementCall.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementEmpty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementEmpty.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementIf.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementIf.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementInput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementOutput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementOutput.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementWhile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/StatementWhile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VarDec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VarDec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VoidVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/ast/VoidVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/javaFiles" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/GenClassWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edu/ufl/cise/plpfa22/implementations/GenClassWriter.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +76,14 @@
       <option name="project" value="LOCAL" />
       <updated>1662766742940</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Restructuring Code Repo">
+      <created>1739221182275</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1739221182275</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -151,7 +102,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial Commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial Commit" />
+    <MESSAGE value="Restructuring Code Repo" />
+    <option name="LAST_COMMIT_MESSAGE" value="Restructuring Code Repo" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
